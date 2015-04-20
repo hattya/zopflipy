@@ -1,6 +1,7 @@
 *.py?
 *.so
 *.sw?
+.coverage
 MANIFEST
 *.egg-info/
 build/
