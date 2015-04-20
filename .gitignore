@@ -1,0 +1,7 @@
+*.py?
+*.so
+*.sw?
+MANIFEST
+*.egg-info/
+build/
+dist/

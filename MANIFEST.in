@@ -1,0 +1,6 @@
+include LICENSE.txt
+include MANIFEST.in
+include README.rst
+include test_zopfli.py
+recursive-include _zopfli/zopfli *.h CONTRIBUTORS COPYING README
+prune _zopfli/zopfli/src/zopflipng
