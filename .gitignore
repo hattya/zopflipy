@@ -4,5 +4,6 @@
 .coverage
 MANIFEST
 *.egg-info/
+.tox/
 build/
 dist/
