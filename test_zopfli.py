@@ -18,7 +18,6 @@
 
 import sys
 import unittest
-import zlib
 
 import zopfli
 
@@ -31,29 +30,44 @@ class ZopfliTestCase(unittest.TestCase):
         self.assertEqual(zopfli.ZOPFLI_FORMAT_DEFLATE, 2)
 
     def test_gzip(self):
-        c = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS + 16)
-        d = zopfli.ZopfliDecompressor(zopfli.ZOPFLI_FORMAT_GZIP)
-        self._test_zopfli(c, d)
+        self._test_zopfli(zopfli.ZOPFLI_FORMAT_GZIP)
 
     def test_zlib(self):
-        c = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS)
-        d = zopfli.ZopfliDecompressor(zopfli.ZOPFLI_FORMAT_ZLIB)
-        self._test_zopfli(c, d)
+        self._test_zopfli(zopfli.ZOPFLI_FORMAT_ZLIB)
 
     def test_deflate(self):
-        c = zlib.compressobj(9, zlib.DEFLATED, -zlib.MAX_WBITS)
-        d = zopfli.ZopfliDecompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
-        self._test_zopfli(c, d)
+        self._test_zopfli(zopfli.ZOPFLI_FORMAT_DEFLATE)
 
-    def _test_zopfli(self, c, d):
-        b = b'Hello, world!'
-        z = c.compress(b) + c.flush()
-        self.assertEqual(d.decompress(z) + d.flush(), b)
-        self.assertEqual(d.unused_data, b'')
-        self.assertEqual(d.unconsumed_tail, b'')
-        if sys.version_info >= (3, 3):
-            self.assertTrue(d.eof)
+    def _test_zopfli(self, fmt):
+        for i in range(-1, 5):
+            c = zopfli.ZopfliCompressor(fmt, block_splitting=i)
+            d = zopfli.ZopfliDecompressor(fmt)
+            b = b'Hello, world!'
+            z = c.compress(b) + c.flush()
+            self.assertEqual(d.decompress(z) + d.flush(), b)
+            self.assertEqual(d.unused_data, b'')
+            self.assertEqual(d.unconsumed_tail, b'')
+            if sys.version_info >= (3, 3):
+                self.assertTrue(d.eof)
 
     def test_unknown(self):
         with self.assertRaises(ValueError):
+            zopfli.ZopfliCompressor(-1)
+
+        with self.assertRaises(ValueError):
             zopfli.ZopfliDecompressor(-1)
+
+    def test_compressor(self):
+        with self.assertRaises(TypeError):
+            zopfli.ZopfliCompressor(None)
+
+        c = zopfli.ZopfliCompressor()
+        with self.assertRaises(TypeError):
+            c.compress(None)
+
+        c = zopfli.ZopfliCompressor()
+        self.assertEqual(c.flush(), b'')
+        with self.assertRaises(ValueError):
+            c.compress(b'')
+        with self.assertRaises(ValueError):
+            c.flush()
