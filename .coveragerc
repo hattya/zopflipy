@@ -1,2 +1,7 @@
 [run]
 branch = True
+
+[report]
+partial_branches =
+    pragma: no partial
+    if sys.version_info
