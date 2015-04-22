@@ -23,6 +23,7 @@
 #endif
 
 #include "zopfli/zopfli.h"
+#include "zopfli/deflate.h"
 
 
 #define MODULE "_zopfli"
@@ -294,6 +295,223 @@ static PyTypeObject Compressor_Type = {
 };
 
 
+typedef struct {
+    PyObject_HEAD
+    ZopfliOptions  options;
+    unsigned char  bp;
+    unsigned char *out;
+    size_t         outsize;
+    PyObject      *data;
+    int            flushed;
+#ifdef WITH_THREAD
+    PyThread_type_lock lock;
+#endif
+} Deflater;
+
+static void
+Deflater_dealloc(Deflater *self) {
+    free(self->out);
+    Py_XDECREF(self->data);
+    FREE_LOCK(self);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+PyDoc_STRVAR(Deflater__doc__,
+"ZopfliDeflater(verbose=False, iterations=15, block_splitting=1,"
+" block_splitting_max=15)\n"
+"\n"
+"Create a compressor object which is using the ZopfliDeflatePart()\n"
+"function for compressing data.");
+
+static int
+Deflater_init(Deflater *self, PyObject *args, PyObject *kwargs) {
+    static char *kwlist[] = {
+        "verbose",
+        "iterations",
+        "block_splitting",
+        "block_splitting_max",
+        NULL,
+    };
+    PyObject *verbose;
+
+    ZopfliInitOptions(&self->options);
+    verbose = Py_False;
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                "|Oiii:ZopfliDeflater", kwlist,
+                &verbose,
+                &self->options.numiterations,
+                &self->options.blocksplitting,
+                &self->options.blocksplittingmax)) {
+        return -1;
+    }
+
+    self->options.verbose = PyObject_IsTrue(verbose);
+    if (self->options.verbose < 0) {
+        return -1;
+    }
+    if (self->options.blocksplitting == 2) {
+        self->options.blocksplitting = 1;
+        self->options.blocksplittinglast = 1;
+    }
+
+    self->bp = 0;
+    free(self->out);
+    self->out = NULL;
+    self->outsize = 0;
+    Py_CLEAR(self->data);
+    self->flushed = 0;
+#ifdef WITH_THREAD
+    ALLOCATE_LOCK(self);
+    if (PyErr_Occurred() != NULL) {
+        return -1;
+    }
+#endif
+    return 0;
+}
+
+static PyObject *
+deflate_part(Deflater *self, int final) {
+    PyObject *v;
+    Py_buffer in = {0};
+    size_t pos, off, n;
+
+    if (self->data == NULL) {
+        return PyBytes_FromString("");
+    }
+
+    v = NULL;
+    if (PyObject_GetBuffer(self->data, &in, PyBUF_CONTIG_RO) < 0) {
+        goto out;
+    }
+
+    pos = self->outsize;
+    Py_BEGIN_ALLOW_THREADS
+    ZopfliDeflatePart(&self->options, 2, final, in.buf, 0, in.len, &self->bp,
+                      &self->out, &self->outsize);
+    Py_END_ALLOW_THREADS
+    if (!final) {
+        /* exclude '256 (end of block)' symbol */
+        if (pos == 0) {
+            off = pos;
+            n = self->outsize - 1;
+        } else {
+            off = pos - 1;
+            n = self->outsize - pos;
+        }
+    } else {
+        /* include '256 (end of block)' symbol */
+        if (pos == 0) {
+            off = pos;
+            n = self->outsize;
+        } else {
+            off = pos - 1;
+            n = self->outsize - pos + 1;
+        }
+    }
+    v = PyBytes_FromStringAndSize((char *)self->out + off, n);
+out:
+    PyBuffer_Release(&in);
+    Py_CLEAR(self->data);
+    return v;
+}
+
+PyDoc_STRVAR(Deflater_compress__doc__,
+"compress(data) -> bytes");
+
+static PyObject *
+Deflater_compress(Deflater *self, PyObject *data) {
+    PyObject *v;
+
+    v = NULL;
+    ACQUIRE_LOCK(self);
+    if (self->flushed) {
+        PyErr_SetString(PyExc_ValueError, "Deflater has been flushed");
+        goto out;
+    }
+    v = deflate_part(self, 0);
+    if (v == NULL) {
+        goto out;
+    }
+    Py_INCREF(data);
+    self->data = data;
+out:
+    RELEASE_LOCK(self);
+    return v;
+}
+
+PyDoc_STRVAR(Deflater_flush__doc__,
+"flush() -> bytes\n"
+"\n"
+"The compressor object cannot be used after this method is called."
+"");
+
+static PyObject *
+Deflater_flush(Deflater *self) {
+    PyObject *v;
+
+    v = NULL;
+    ACQUIRE_LOCK(self);
+    if (self->flushed) {
+        PyErr_SetString(PyExc_ValueError, "repeated call to flush()");
+        goto out;
+    }
+    self->flushed = 1;
+    v = deflate_part(self, 1);
+out:
+    RELEASE_LOCK(self);
+    return v;
+}
+
+static PyMethodDef Deflater_methods[] = {
+    {"compress", (PyCFunction)Deflater_compress, METH_O,
+     Deflater_compress__doc__},
+    {"flush",    (PyCFunction)Deflater_flush,    METH_NOARGS,
+     Deflater_flush__doc__},
+    {0},
+};
+
+static PyTypeObject Deflater_Type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    MODULE ".ZopfliDeflater",                 /* tp_name           */
+    sizeof(Deflater),                         /* tp_basicsize      */
+    0,                                        /* tp_itemsize       */
+    (destructor)Deflater_dealloc,             /* tp_dealloc        */
+    NULL,                                     /* tp_print          */
+    NULL,                                     /* tp_getattr        */
+    NULL,                                     /* tp_setattr        */
+    NULL,                                     /* tp_reserved       */
+    NULL,                                     /* tp_repr           */
+    NULL,                                     /* tp_as_number      */
+    NULL,                                     /* tp_as_sequence    */
+    NULL,                                     /* tp_as_mapping     */
+    NULL,                                     /* tp_hash           */
+    NULL,                                     /* tp_call           */
+    NULL,                                     /* tp_str            */
+    NULL,                                     /* tp_getattro       */
+    NULL,                                     /* tp_setattro       */
+    NULL,                                     /* tp_as_buffer      */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags          */
+    Deflater__doc__,                          /* tp_doc            */
+    NULL,                                     /* tp_traverse       */
+    NULL,                                     /* tp_clear          */
+    NULL,                                     /* tp_richcompare    */
+    0,                                        /* tp_weaklistoffset */
+    NULL,                                     /* tp_iter           */
+    NULL,                                     /* tp_iternext       */
+    Deflater_methods,                         /* tp_methods        */
+    NULL,                                     /* tp_members        */
+    NULL,                                     /* tp_getset         */
+    NULL,                                     /* tp_base           */
+    NULL,                                     /* tp_dict           */
+    NULL,                                     /* tp_descr_get      */
+    NULL,                                     /* tp_descr_set      */
+    0,                                        /* tp_dictoffset     */
+    (initproc)Deflater_init,                  /* tp_init           */
+    NULL,                                     /* tp_alloc          */
+    PyType_GenericNew,                        /* tp_new            */
+};
+
+
 #if PY_MAJOR_VERSION < 3
 # define PyInit__zopfli   init_zopfli
 # define RETURN_MODULE(m) return
@@ -342,6 +560,7 @@ PyInit__zopfli(void) {
     } while (0)
 
     ADD_TYPE(m, &Compressor_Type);
+    ADD_TYPE(m, &Deflater_Type);
 
 #undef ADD_TYPE
 

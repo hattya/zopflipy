@@ -32,10 +32,23 @@ or
 Usage
 -----
 
+ZopfliCompressor:
+
 .. code:: pycon
 
    >>> import zopfli
    >>> c = zopfli.ZopfliCompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
+   >>> z = c.compress(b'Hello, world!') + c.flush()
+   >>> d = zopfli.ZopfliDecompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
+   >>> d.decompress(z) + d.flush()
+   b'Hello, world!''
+
+ZopfliDeflater:
+
+.. code:: pycon
+
+   >>> import zopfli
+   >>> c = zopfli.ZopfliDeflater()
    >>> z = c.compress(b'Hello, world!') + c.flush()
    >>> d = zopfli.ZopfliDecompressor(zopfli.ZOPFLI_FORMAT_DEFLATE)
    >>> d.decompress(z) + d.flush()

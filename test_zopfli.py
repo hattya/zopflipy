@@ -41,14 +41,9 @@ class ZopfliTestCase(unittest.TestCase):
     def _test_zopfli(self, fmt):
         for i in range(-1, 5):
             c = zopfli.ZopfliCompressor(fmt, block_splitting=i)
-            d = zopfli.ZopfliDecompressor(fmt)
             b = b'Hello, world!'
             z = c.compress(b) + c.flush()
-            self.assertEqual(d.decompress(z) + d.flush(), b)
-            self.assertEqual(d.unused_data, b'')
-            self.assertEqual(d.unconsumed_tail, b'')
-            if sys.version_info >= (3, 3):
-                self.assertTrue(d.eof)
+            self._test_decompress(fmt, z, b)
 
     def test_unknown(self):
         with self.assertRaises(ValueError):
@@ -71,3 +66,44 @@ class ZopfliTestCase(unittest.TestCase):
             c.compress(b'')
         with self.assertRaises(ValueError):
             c.flush()
+
+    def test_deflater(self):
+        for i in range(3):
+            c = zopfli.ZopfliDeflater(block_splitting=i)
+            b = b'Hello, world!'
+            z = c.compress(b) + c.flush()
+            self._test_decompress(zopfli.ZOPFLI_FORMAT_DEFLATE, z, b)
+
+            c = zopfli.ZopfliDeflater(block_splitting=i)
+            b = b'Hello, world!'
+            z = c.compress(b) + c.compress(b) + c.compress(b) + c.flush()
+            self._test_decompress(zopfli.ZOPFLI_FORMAT_DEFLATE, z, b * 3)
+
+        with self.assertRaises(TypeError):
+            zopfli.ZopfliDeflater(iterations=None)
+
+        with self.assertRaises(TypeError):
+            zopfli.ZopfliDeflater(block_splitting=None)
+
+        with self.assertRaises(TypeError):
+            zopfli.ZopfliDeflater(block_splitting_max=None)
+
+        c = zopfli.ZopfliDeflater()
+        c.compress(None)
+        with self.assertRaises(TypeError):
+            c.compress(None)
+
+        c = zopfli.ZopfliDeflater()
+        self.assertEqual(c.flush(), b'')
+        with self.assertRaises(ValueError):
+            c.compress(b'')
+        with self.assertRaises(ValueError):
+            c.flush()
+
+    def _test_decompress(self, fmt, z, b):
+        d = zopfli.ZopfliDecompressor(fmt)
+        self.assertEqual(d.decompress(z) + d.flush(), b)
+        self.assertEqual(d.unused_data, b'')
+        self.assertEqual(d.unconsumed_tail, b'')
+        if sys.version_info >= (3, 3):
+            self.assertTrue(d.eof)

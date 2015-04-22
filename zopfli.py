@@ -22,12 +22,12 @@ import sys
 import zlib
 
 from _zopfli import (ZOPFLI_FORMAT_GZIP, ZOPFLI_FORMAT_ZLIB, ZOPFLI_FORMAT_DEFLATE,
-                     ZopfliCompressor)
+                     ZopfliCompressor, ZopfliDeflater)
 
 
 __version__ = '1.0.dev'
 __all__ = ['ZOPFLI_FORMAT_GZIP', 'ZOPFLI_FORMAT_ZLIB', 'ZOPFLI_FORMAT_DEFLATE',
-           'ZopfliCompressor', 'ZopfliDecompressor']
+           'ZopfliCompressor', 'ZopfliDeflater', 'ZopfliDecompressor']
 
 
 class ZopfliDecompressor(object):
