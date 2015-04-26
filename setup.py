@@ -71,7 +71,7 @@ except:
 py_modules = ['zopfli']
 ext_modules = [Extension('_zopfli',
                          include_dirs=[zopfli_dir],
-                         sources=list_sources('.', ['.c']))]
+                         sources=list_sources('.', ['.c', '.cc', '.cpp']))]
 
 cmdclass = {
     'test': test,
@@ -93,6 +93,7 @@ setup(name='zopflipy',
           'License :: OSI Approved :: Apache Software License',
           'Operating System :: OS Independent',
           'Programming Language :: C',
+          'Programming Language :: C++',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',

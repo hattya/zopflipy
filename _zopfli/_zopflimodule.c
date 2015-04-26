@@ -16,49 +16,10 @@
  *   limitations under the License.
  */
 
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#ifdef WITH_THREAD
-# include <pythread.h>
-#endif
+#include "_zopflimodule.h"
 
 #include "zopfli/zopfli.h"
 #include "zopfli/deflate.h"
-
-
-#define MODULE "_zopfli"
-
-#ifdef WITH_THREAD
-# define ALLOCATE_LOCK(self)                                                \
-     do {                                                                   \
-         if ((self)->lock != NULL) {                                        \
-             break;                                                         \
-         }                                                                  \
-         (self)->lock = PyThread_allocate_lock();                           \
-         if ((self)->lock == NULL) {                                        \
-             PyErr_SetString(PyExc_MemoryError, "unable to allocate lock"); \
-         }                                                                  \
-     } while (0)
-# define FREE_LOCK(self)                        \
-     do {                                       \
-         if ((self)->lock != NULL) {            \
-             PyThread_free_lock((self)->lock);  \
-         }                                      \
-     } while (0)
-# define ACQUIRE_LOCK(self)                             \
-     do {                                               \
-         if (!PyThread_acquire_lock((self)->lock, 0)) { \
-             Py_BEGIN_ALLOW_THREADS                     \
-             PyThread_acquire_lock((self)->lock, 1);    \
-             Py_END_ALLOW_THREADS                       \
-         }                                              \
-     } while (0)
-# define RELEASE_LOCK(self) PyThread_release_lock((self)->lock)
-#else
-# define FREE_LOCK(self)
-# define ACQUIRE_LOCK(self)
-# define RELEASE_LOCK(self)
-#endif
 
 
 typedef struct {
@@ -253,7 +214,7 @@ static PyMethodDef Compressor_methods[] = {
     {0},
 };
 
-static PyTypeObject Compressor_Type = {
+PyTypeObject Compressor_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
     MODULE ".ZopfliCompressor",               /* tp_name           */
     sizeof(Compressor),                       /* tp_basicsize      */
@@ -470,7 +431,7 @@ static PyMethodDef Deflater_methods[] = {
     {0},
 };
 
-static PyTypeObject Deflater_Type = {
+PyTypeObject Deflater_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
     MODULE ".ZopfliDeflater",                 /* tp_name           */
     sizeof(Deflater),                         /* tp_basicsize      */
@@ -561,6 +522,7 @@ PyInit__zopfli(void) {
 
     ADD_TYPE(m, &Compressor_Type);
     ADD_TYPE(m, &Deflater_Type);
+    ADD_TYPE(m, &PNG_Type);
 
 #undef ADD_TYPE
 

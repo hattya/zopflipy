@@ -54,6 +54,17 @@ ZopfliDeflater:
    >>> d.decompress(z) + d.flush()
    b'Hello, world!''
 
+ZopfliPNG:
+
+.. code:: pycon
+
+   >>> import zopfli
+   >>> png = zopfli.ZopfliPNG()
+   >>> with open('in.png', 'rb') as fp:
+   ...     data = fp.read()
+   >>> len(png.optimize(data)) < len(data)
+   True
+
 
 License
 -------
