@@ -16,8 +16,13 @@
 #   limitations under the License.
 #
 
+import io
+import os
+import shutil
 import sys
+import tempfile
 import unittest
+import zipfile
 
 import zopfli
 
@@ -189,3 +194,101 @@ class ZopfliPNGTestCase(unittest.TestCase):
             png.optimize(None)
         with self.assertRaises(ValueError):
             png.optimize(b'')
+
+
+class ZipFileTest(unittest.TestCase):
+
+    def setUp(self):
+        super(ZipFileTest, self).setUp()
+        self.path = tempfile.mkdtemp(prefix='zopfli-')
+
+    def tearDown(self):
+        super(ZipFileTest, self).tearDown()
+        shutil.rmtree(self.path)
+
+    def test_ascii(self):
+        names = {
+            'New Folder': 'New Folder',
+            'spam': 'spam',
+            'eggs': 'eggs',
+            'ham': 'ham',
+            'toast': 'toast',
+            'beans': 'beans',
+            'bacon': 'bacon',
+            'sausage': 'sausage',
+        }
+        self._test_zip('ascii', names)
+
+    def test_cp932(self):
+        names = {
+            'New Folder': u'\u65b0\u3057\u3044\u30d5\u30a9\u30eb\u30c0\u30fc',
+            'spam': u'\u30b9\u30d1\u30e0',
+            'eggs': u'\u30a8\u30c3\u30b0\u30b9',
+            'ham': u'\u30cf\u30e0',
+            'toast': u'\u30c8\u30fc\u30b9\u30c8',
+            'beans': u'\u30d3\u30fc\u30f3\u30ba',
+            'bacon': u'\u30d9\u30fc\u30b3\u30f3',
+            'sausage': u'\u30bd\u30fc\u30bb\u30fc\u30b8',
+        }
+        self._test_zip('cp932', names)
+
+    def test_utf_8(self):
+        names = {
+            'New Folder': u'\u65b0\u3057\u3044\u30d5\u30a9\u30eb\u30c0\u30fc',
+            'spam': u'\u30b9\u30d1\u30e0',
+            'eggs': u'\u30a8\u30c3\u30b0\u30b9',
+            'ham': u'\u30cf\u30e0',
+            'toast': u'\u30c8\u30fc\u30b9\u30c8',
+            'beans': u'\u30d3\u30fc\u30f3\u30ba',
+            'bacon': u'\u30d9\u30fc\u30b3\u30f3',
+            'sausage': u'\u30bd\u30fc\u30bb\u30fc\u30b8',
+        }
+        self._test_zip('utf-8', names)
+
+    def _test_zip(self, encoding, names):
+        if sys.version_info < (3, 0):
+            def u(s):
+                return s.decode('utf-8').format(**names)
+        else:
+            def u(s):
+                return s.format(**names)
+
+        def write(zf, name, deflate=True):
+            p = os.path.join(self.path, name)
+            with io.open(p, 'w', encoding=encoding) as fp:
+                fp.write(os.path.splitext(os.path.basename(name))[0])
+            zf.write(p, name, zipfile.ZIP_DEFLATED if deflate else zipfile.ZIP_STORED)
+
+        def writestr(zf, name, deflate=True):
+            data = os.path.splitext(os.path.basename(name))[0].encode(encoding)
+            zf.writestr(name, data, zipfile.ZIP_DEFLATED if deflate else zipfile.ZIP_STORED)
+
+        path = os.path.join(self.path, '{}.zip'.format(encoding))
+        folder = '{New Folder}'
+        os.mkdir(u(os.path.join(self.path, folder)))
+        with zopfli.ZipFile(path, 'w', encoding=encoding) as zf:
+            write(zf, u(os.path.join(folder, '{spam}.txt')))
+            write(zf, u(os.path.join(folder, '{eggs}.txt')), False)
+            writestr(zf, u(os.path.join(folder, '{ham}.txt')))
+            writestr(zf, u(os.path.join(folder, '{toast}.txt')), False)
+            write(zf, u(os.path.join(folder, '{beans}.txt')))
+            writestr(zf, u(os.path.join(folder, '{bacon}.txt')))
+            write(zf, u(os.path.join(folder, '{sausage}.txt')), False)
+        with zopfli.ZipFile(path, 'r', encoding=encoding) as zf:
+            for n, compress_type in (('{spam}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{eggs}.txt', zipfile.ZIP_STORED),
+                                     ('{ham}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{toast}.txt', zipfile.ZIP_STORED),
+                                     ('{beans}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{bacon}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{sausage}.txt', zipfile.ZIP_STORED)):
+                name = u(os.path.join(folder, n)).replace(os.path.sep, '/')
+                raw_name = name.encode(encoding)
+                if sys.version_info >= (3, 0):
+                    raw_name = raw_name.decode('utf-8' if encoding == 'utf-8' else 'cp437')
+                zi = zf.getinfo(name)
+                self.assertEqual(zi.orig_filename, raw_name)
+                self.assertEqual(zi.filename, name)
+                self.assertEqual(zi.compress_type, compress_type)
+                self.assertEqual(zi.flag_bits, 0x800 if encoding == 'utf-8' else 0)
+                self.assertEqual(zf.read(zi), u(os.path.splitext(n)[0]).encode(encoding))
