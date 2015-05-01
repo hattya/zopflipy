@@ -41,10 +41,12 @@ def list_sources(path, exts):
 class test(Command):
 
     description = 'run unit tests'
-    user_options = []
+    user_options = [('failfast', 'f', 'stop on first fail or error')]
+
+    boolean_options = ['failfast']
 
     def initialize_options(self):
-        pass
+        self.failfast = 0
 
     def finalize_options(self):
         pass
@@ -59,6 +61,8 @@ class test(Command):
         argv = [sys.argv[0]]
         if self.verbose:
             argv.append('--verbose')
+        if self.failfast:
+            argv.append('--failfast')
         unittest.main('test_zopfli', argv=argv)
 
 
