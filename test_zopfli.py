@@ -201,6 +201,8 @@ class ZipFileTest(unittest.TestCase):
     def setUp(self):
         super(ZipFileTest, self).setUp()
         self.path = tempfile.mkdtemp(prefix='zopfli-')
+        if sys.version_info < (3, 0):
+            self.path = self.path.decode(sys.getfilesystemencoding(), 'surrogateescape')
 
     def tearDown(self):
         super(ZipFileTest, self).tearDown()
