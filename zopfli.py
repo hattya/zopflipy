@@ -68,7 +68,7 @@ class ZopfliDecompressor(object):
         return self.__z.flush(*args, **kwargs)
 
 
-class ZipFile(zipfile.ZipFile):
+class ZipFile(zipfile.ZipFile, object):
 
     def __init__(self, file, mode='r', compression=zipfile.ZIP_DEFLATED,
                  allowZip64=False, encoding='cp437', **kwargs):
@@ -145,7 +145,10 @@ class ZipFile(zipfile.ZipFile):
             self.fp = fp
         pos = self.fp.tell()
         self.fp.seek(zi.header_offset)
-        self.fp.write(zi.FileHeader(self._zip64(zi)))
+        if sys.version_info < (2, 7, 4):
+            self.fp.write(zi.FileHeader())
+        else:
+            self.fp.write(zi.FileHeader(self._zip64(zi)))
         self.fp.seek(pos)
         self.filelist[-1] = zi
         self.NameToInfo[zi.filename] = zi
@@ -196,7 +199,10 @@ class ZipFile(zipfile.ZipFile):
             self.fp = fp
         pos = self.fp.tell()
         self.fp.seek(zi.header_offset)
-        self.fp.write(zi.FileHeader(self._zip64(zi)))
+        if sys.version_info < (2, 7, 4):
+            self.fp.write(zi.FileHeader())
+        else:
+            self.fp.write(zi.FileHeader(self._zip64(zi)))
         self.fp.seek(pos)
         self.filelist[-1] = zi
         self.NameToInfo[zi.filename] = zi
