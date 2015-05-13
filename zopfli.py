@@ -105,7 +105,8 @@ class ZipFile(zipfile.ZipFile, object):
                 return getattr(self._fp, name)
 
             def seek(self, offset, whence=os.SEEK_SET):
-                if self._z:
+                if (0 < self._i and
+                    self._z):
                     data = self._z.flush()
                     self.size += len(data)
                     self._fp.write(data)
@@ -143,13 +144,13 @@ class ZipFile(zipfile.ZipFile, object):
                 fp.seek(self.fp.pos)
         finally:
             self.fp = fp
-        pos = self.fp.tell()
+        self.start_dir = self.fp.tell()
         self.fp.seek(zi.header_offset)
         if sys.version_info < (2, 7, 4):
             self.fp.write(zi.FileHeader())
         else:
             self.fp.write(zi.FileHeader(self._zip64(zi)))
-        self.fp.seek(pos)
+        self.fp.seek(self.start_dir)
         self.filelist[-1] = zi
         self.NameToInfo[zi.filename] = zi
 
@@ -197,13 +198,13 @@ class ZipFile(zipfile.ZipFile, object):
                     fp.write(data)
         finally:
             self.fp = fp
-        pos = self.fp.tell()
+        self.start_dir = self.fp.tell()
         self.fp.seek(zi.header_offset)
         if sys.version_info < (2, 7, 4):
             self.fp.write(zi.FileHeader())
         else:
             self.fp.write(zi.FileHeader(self._zip64(zi)))
-        self.fp.seek(pos)
+        self.fp.seek(self.start_dir)
         self.filelist[-1] = zi
         self.NameToInfo[zi.filename] = zi
 
