@@ -3,6 +3,12 @@ ZopfliPy
 
 A Python_ bindings for Zopfli_.
 
+.. image:: https://drone.io/github.com/hattya/zopflipy/status.png
+   :target: https://drone.io/github.com/hattya/zopflipy/latest
+
+.. image:: https://ci.appveyor.com/api/projects/status/98a7e7d6qlkvs6vl?svg=true
+   :target: https://ci.appveyor.com/project/hattya/zopflipy
+
 .. _Python: https://www.python.org/
 .. _Zopfli: https://github.com/google/zopfli
 
