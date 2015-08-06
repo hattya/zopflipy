@@ -269,6 +269,7 @@ class ZipFileTest(unittest.TestCase):
         folder = '{New Folder}'
         os.mkdir(u(os.path.join(self.path, folder)))
         with zopfli.ZipFile(path, 'w', encoding=encoding) as zf:
+            zf.write(os.path.join(self.path, u(folder)))
             write(zf, u(os.path.join(folder, '{spam}.txt')))
             write(zf, u(os.path.join(folder, '{eggs}.txt')), False)
             writestr(zf, u(os.path.join(folder, '{ham}.txt')))

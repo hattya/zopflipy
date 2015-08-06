@@ -141,7 +141,8 @@ class ZipFile(zipfile.ZipFile, object):
             if zopflify:
                 zi.compress_type = zipfile.ZIP_DEFLATED
                 zi.compress_size = self.fp.size
-                fp.seek(self.fp.pos)
+                if not zi.filename.endswith('/'):
+                    fp.seek(self.fp.pos)
         finally:
             self.fp = fp
         self.start_dir = self.fp.tell()
