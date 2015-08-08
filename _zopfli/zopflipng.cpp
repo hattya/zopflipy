@@ -24,7 +24,6 @@
 
 struct PNG {
     PyObject_HEAD
-    int               verbose;
     PyObject*         filter_strategies;
     PyObject*         keep_chunks;
     ZopfliPNGOptions* options;
@@ -253,7 +252,7 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
         var = !!b;                      \
     } while (false)
 
-    PARSE_BOOL(self->verbose,                       verbose);
+    PARSE_BOOL(self->options->verbose,              verbose);
     PARSE_BOOL(self->options->lossy_transparent,    lossy_transparent);
     PARSE_BOOL(self->options->lossy_8bit,           lossy_8bit);
     PARSE_BOOL(self->options->auto_filter_strategy, auto_filter_strategy);
@@ -314,7 +313,7 @@ static PyObject* PNG_optimize(PNG* self, PyObject* data) {
     buf.assign(p, p + in.len);
     unsigned err;
     Py_BEGIN_ALLOW_THREADS
-    err = ZopfliPNGOptimize(buf, *self->options, !!self->verbose, &out);
+    err = ZopfliPNGOptimize(buf, *self->options, self->options->verbose, &out);
     Py_END_ALLOW_THREADS
     if (err) {
         PyErr_SetString(PyExc_ValueError, lodepng_error_text(err));
@@ -346,7 +345,6 @@ static PyMethodDef PNG_methods[] = {
     {const_cast<char*>(#v), tp, offsetof(PNG, v), READONLY}
 
 static PyMemberDef PNG_members[] = {
-    MEMBER(verbose,           T_BOOL),
     MEMBER(filter_strategies, T_OBJECT),
     MEMBER(keep_chunks,       T_OBJECT),
     {0},
@@ -357,7 +355,9 @@ static PyMemberDef PNG_members[] = {
 static PyObject* PNG_get_bool(PNG* self, void* closure) {
     const char *s = static_cast<char*>(closure);
     bool v = false;
-    if (strcmp(s, "lossy_transparent") == 0) {
+    if (strcmp(s, "verbose") == 0) {
+        v = self->options->verbose;
+    } else if (strcmp(s, "lossy_transparent") == 0) {
         v = self->options->lossy_transparent;
     } else if (strcmp(s, "lossy_8bit") == 0) {
         v = self->options->lossy_8bit;
@@ -395,6 +395,7 @@ static PyObject* PNG_get_int(PNG* self, void* closure) {
     {const_cast<char*>(#v), reinterpret_cast<getter>(PNG_get_ ## tp), 0, 0, const_cast<char*>(#v)}
 
 static PyGetSetDef PNG_getset[] = {
+    GET_SET(verbose,              bool),
     GET_SET(lossy_transparent,    bool),
     GET_SET(lossy_8bit,           bool),
     GET_SET(auto_filter_strategy, bool),
