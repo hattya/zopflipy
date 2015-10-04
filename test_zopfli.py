@@ -21,6 +21,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 import unittest
 import zipfile
 
@@ -218,6 +219,7 @@ class ZipFileTest(unittest.TestCase):
             'beans': 'beans',
             'bacon': 'bacon',
             'sausage': 'sausage',
+            'tomato': 'tomato',
         }
         self._test_zip('ascii', names)
 
@@ -231,6 +233,7 @@ class ZipFileTest(unittest.TestCase):
             'beans': u'\u30d3\u30fc\u30f3\u30ba',
             'bacon': u'\u30d9\u30fc\u30b3\u30f3',
             'sausage': u'\u30bd\u30fc\u30bb\u30fc\u30b8',
+            'tomato': u'\u30c8\u30de\u30c8',
         }
         self._test_zip('cp932', names)
 
@@ -244,6 +247,7 @@ class ZipFileTest(unittest.TestCase):
             'beans': u'\u30d3\u30fc\u30f3\u30ba',
             'bacon': u'\u30d9\u30fc\u30b3\u30f3',
             'sausage': u'\u30bd\u30fc\u30bb\u30fc\u30b8',
+            'tomato': u'\u30c8\u30de\u30c8',
         }
         self._test_zip('utf-8', names)
 
@@ -261,9 +265,13 @@ class ZipFileTest(unittest.TestCase):
                 fp.write(os.path.splitext(os.path.basename(name))[0])
             zf.write(p, name, zipfile.ZIP_DEFLATED if deflate else zipfile.ZIP_STORED)
 
-        def writestr(zf, name, deflate=True):
+        def writestr(zf, name, deflate=True, zinfo=False):
             data = os.path.splitext(os.path.basename(name))[0].encode(encoding)
-            zf.writestr(name, data, zipfile.ZIP_DEFLATED if deflate else zipfile.ZIP_STORED)
+            compress_type = zipfile.ZIP_DEFLATED if deflate else zipfile.ZIP_STORED
+            if zinfo:
+                name = zopfli.ZipInfo(name, time.localtime(time.time())[:6])
+                name.compress_type = compress_type
+            zf.writestr(name, data, compress_type)
 
         path = os.path.join(self.path, '{}.zip'.format(encoding))
         folder = '{New Folder}'
@@ -271,12 +279,13 @@ class ZipFileTest(unittest.TestCase):
         with zopfli.ZipFile(path, 'w', encoding=encoding) as zf:
             zf.write(u(os.path.join(self.path, folder)))
             write(zf, u(os.path.join(folder, '{spam}.txt')))
-            write(zf, u(os.path.join(folder, '{eggs}.txt')), False)
+            write(zf, u(os.path.join(folder, '{eggs}.txt')), deflate=False)
             writestr(zf, u(os.path.join(folder, '{ham}.txt')))
-            writestr(zf, u(os.path.join(folder, '{toast}.txt')), False)
+            writestr(zf, u(os.path.join(folder, '{toast}.txt')), deflate=False)
             write(zf, u(os.path.join(folder, '{beans}.txt')))
-            writestr(zf, u(os.path.join(folder, '{bacon}.txt')))
-            write(zf, u(os.path.join(folder, '{sausage}.txt')), False)
+            writestr(zf, u(os.path.join(folder, '{bacon}.txt')), zinfo=True)
+            writestr(zf, u(os.path.join(folder, '{sausage}.txt')), deflate=False, zinfo=True)
+            write(zf, u(os.path.join(folder, '{tomato}.txt')), deflate=False)
         with zopfli.ZipFile(path, 'r', encoding=encoding) as zf:
             for n, compress_type in (('{spam}.txt', zipfile.ZIP_DEFLATED),
                                      ('{eggs}.txt', zipfile.ZIP_STORED),
@@ -284,7 +293,8 @@ class ZipFileTest(unittest.TestCase):
                                      ('{toast}.txt', zipfile.ZIP_STORED),
                                      ('{beans}.txt', zipfile.ZIP_DEFLATED),
                                      ('{bacon}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{sausage}.txt', zipfile.ZIP_STORED)):
+                                     ('{sausage}.txt', zipfile.ZIP_STORED),
+                                     ('{tomato}.txt', zipfile.ZIP_STORED)):
                 name = u(os.path.join(folder, n)).replace(os.path.sep, '/')
                 raw_name = name.encode(encoding)
                 if sys.version_info >= (3, 0):

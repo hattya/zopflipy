@@ -157,10 +157,10 @@ class ZipFile(zipfile.ZipFile, object):
 
     def writestr(self, zinfo_or_arcname, data, compress_type=None, **kwargs):
         class ZopfliFile(object):
-            def __init__(self, zf, z):
+            def __init__(self, zf, z, rw):
                 self.size = 0
                 self._fp = zf.fp
-                self._rewrite = zf._rewrite
+                self._rewrite = zf._rewrite if rw else None
                 self._w = 0
                 self._z = z
 
@@ -169,7 +169,7 @@ class ZipFile(zipfile.ZipFile, object):
 
             def write(self, data):
                 if self._w == 0:
-                    self._fp.write(self._rewrite(data))
+                    self._fp.write(self._rewrite(data) if self._rewrite else data)
                 elif self._w == 1:
                     if self._z:
                         data = self._z.compress(data) + self._z.flush()
@@ -177,6 +177,12 @@ class ZipFile(zipfile.ZipFile, object):
                     self._fp.write(data)
                 self._w += 1
 
+        rw = True
+        if isinstance(zinfo_or_arcname, zipfile.ZipInfo):
+            compress_type = zinfo_or_arcname.compress_type
+            if isinstance(zinfo_or_arcname, ZipInfo):
+                zinfo_or_arcname.encoding = self.encoding
+                rw = False
         zopflify = self._zopflify(compress_type)
         if zopflify:
             compress_type = zipfile.ZIP_STORED
@@ -187,7 +193,7 @@ class ZipFile(zipfile.ZipFile, object):
             z = None
         fp = self.fp
         try:
-            self.fp = ZopfliFile(self, z)
+            self.fp = ZopfliFile(self, z, rw)
             super(ZipFile, self).writestr(zinfo_or_arcname, data, compress_type)
             zi = self._convert(self.filelist[-1])
             if zopflify:
@@ -210,13 +216,16 @@ class ZipFile(zipfile.ZipFile, object):
         self.NameToInfo[zi.filename] = zi
 
     def _convert(self, src):
-        dst = ZipInfo()
+        if isinstance(src, ZipInfo):
+            dst = src
+        else:
+            dst = ZipInfo()
+            for n in src.__slots__:
+                try:
+                    setattr(dst, n, getattr(src, n))
+                except AttributeError:
+                    pass
         dst.encoding = self.encoding
-        for n in src.__slots__:
-            try:
-                setattr(dst, n, getattr(src, n))
-            except AttributeError:
-                pass
         return dst
 
     def _rewrite(self, fh):
