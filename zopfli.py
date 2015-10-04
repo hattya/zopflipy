@@ -249,12 +249,15 @@ class ZipInfo(zipfile.ZipInfo):
 
     def __init__(self, *args, **kwargs):
         super(ZipInfo, self).__init__(*args, **kwargs)
-        self.encoding = 'cp437'
+        self.encoding = None
 
     def _encodeFilenameFlags(self):
         if isinstance(self.filename, bytes):
             return self.filename, self.flag_bits
-        if codecs.lookup(self.encoding).name != 'utf-8':
-            return self.filename.encode(self.encoding), self.flag_bits
-        else:
-            return self.filename.encode('utf-8'), self.flag_bits | 0x800
+        encoding = codecs.lookup(self.encoding).name if self.encoding else 'ascii'
+        if encoding != 'utf-8':
+            try:
+                return self.filename.encode(encoding), self.flag_bits
+            except UnicodeEncodeError:
+                pass
+        return self.filename.encode('utf-8'), self.flag_bits | 0x800

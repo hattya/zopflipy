@@ -224,6 +224,7 @@ class ZipFileTest(unittest.TestCase):
         self._test_zip('ascii', names)
 
     def test_cp932(self):
+        encoding = 'cp932'
         names = {
             'New Folder': u'\u65b0\u3057\u3044\u30d5\u30a9\u30eb\u30c0\u30fc',
             'spam': u'\u30b9\u30d1\u30e0',
@@ -235,9 +236,11 @@ class ZipFileTest(unittest.TestCase):
             'sausage': u'\u30bd\u30fc\u30bb\u30fc\u30b8',
             'tomato': u'\u30c8\u30de\u30c8',
         }
-        self._test_zip('cp932', names)
+        self._test_encode(encoding, names)
+        self._test_zip(encoding, names)
 
     def test_utf_8(self):
+        encoding = 'utf-8'
         names = {
             'New Folder': u'\u65b0\u3057\u3044\u30d5\u30a9\u30eb\u30c0\u30fc',
             'spam': u'\u30b9\u30d1\u30e0',
@@ -249,15 +252,38 @@ class ZipFileTest(unittest.TestCase):
             'sausage': u'\u30bd\u30fc\u30bb\u30fc\u30b8',
             'tomato': u'\u30c8\u30de\u30c8',
         }
-        self._test_zip('utf-8', names)
+        self._test_encode(encoding, names)
+        self._test_zip(encoding, names)
+
+    def _test_encode(self, encoding, names):
+        u = self._u(names)
+
+        def writestr(zf, name, raw_name=None):
+            zi = zopfli.ZipInfo(name, time.localtime(time.time())[:6])
+            if raw_name:
+                zi.filename = raw_name
+            data = os.path.splitext(os.path.basename(name))[0].encode(encoding)
+            zf.writestr(zi, data)
+
+        path = os.path.join(self.path, 'cp437.zip')
+        with zopfli.ZipFile(path, 'w', encoding='cp437') as zf:
+            writestr(zf, u('{spam}.txt'))
+            writestr(zf, u('{eggs}.txt'), u('{eggs}.txt').encode(encoding))
+        with zopfli.ZipFile(path, 'r', encoding=encoding) as zf:
+            for n, flag_bits in (('{spam}.txt', 0x800),
+                                 ('{eggs}.txt', 0)):
+                name = u(n)
+                raw_name = name.encode('utf-8' if flag_bits else encoding)
+                if sys.version_info >= (3, 0):
+                    raw_name = raw_name.decode('utf-8' if flag_bits else 'cp437')
+                zi = zf.getinfo(name)
+                self.assertEqual(zi.orig_filename, raw_name)
+                self.assertEqual(zi.filename, name)
+                self.assertEqual(zi.flag_bits, flag_bits)
+                self.assertEqual(zf.read(zi), u(os.path.splitext(n)[0]).encode(encoding))
 
     def _test_zip(self, encoding, names):
-        if sys.version_info < (3, 0):
-            def u(s):
-                return s.decode('utf-8').format(**names)
-        else:
-            def u(s):
-                return s.format(**names)
+        u = self._u(names)
 
         def write(zf, name, deflate=True):
             p = os.path.join(self.path, name)
@@ -305,3 +331,12 @@ class ZipFileTest(unittest.TestCase):
                 self.assertEqual(zi.compress_type, compress_type)
                 self.assertEqual(zi.flag_bits, 0x800 if encoding == 'utf-8' else 0)
                 self.assertEqual(zf.read(zi), u(os.path.splitext(n)[0]).encode(encoding))
+
+    def _u(self, names):
+        if sys.version_info < (3, 0):
+            def u(s):
+                return s.decode('utf-8').format(**names)
+        else:
+            def u(s):
+                return s.format(**names)
+        return u
