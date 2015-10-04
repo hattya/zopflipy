@@ -98,43 +98,43 @@ class ZipFile(zipfile.ZipFile, object):
                 self.pos = 0
                 self._fp = zf.fp
                 self._rewrite = zf._rewrite
-                self._i = 0
+                self._w = 0
                 self._z = z
 
             def __getattr__(self, name):
                 return getattr(self._fp, name)
 
             def seek(self, offset, whence=os.SEEK_SET):
-                if (0 < self._i and
+                if (0 < self._w and
                     self._z):
                     data = self._z.flush()
                     self.size += len(data)
                     self._fp.write(data)
                     self._z = None
                     self.pos = self._fp.tell()
-                self._i = -self._i
+                self._w = -self._w
                 return self._fp.seek(offset, whence)
 
             def write(self, data):
-                if self._i == 0:
+                if self._w == 0:
                     self._fp.write(self._rewrite(data))
-                elif 0 < self._i:
+                elif 0 < self._w:
                     if self._z:
                         data = self._z.compress(data)
                         self.size += len(data)
                     self._fp.write(data)
-                self._i += 1
+                self._w += 1
 
+        zopflify = self._zopflify(compress_type)
+        if zopflify:
+            compress_type = zipfile.ZIP_STORED
+            opts = self._options.copy()
+            opts.update(kwargs)
+            z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
+        else:
+            z = None
         fp = self.fp
         try:
-            zopflify = self._zopflify(compress_type)
-            if zopflify:
-                compress_type = zipfile.ZIP_STORED
-                opts = self._options.copy()
-                opts.update(kwargs)
-                z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
-            else:
-                z = None
             self.fp = ZopfliFile(self, z)
             super(ZipFile, self).write(filename, arcname, compress_type)
             zi = self._convert(self.filelist[-1])
@@ -161,32 +161,32 @@ class ZipFile(zipfile.ZipFile, object):
                 self.size = 0
                 self._fp = zf.fp
                 self._rewrite = zf._rewrite
-                self._i = 0
+                self._w = 0
                 self._z = z
 
             def __getattr__(self, name):
                 return getattr(self._fp, name)
 
             def write(self, data):
-                if self._i == 0:
+                if self._w == 0:
                     self._fp.write(self._rewrite(data))
-                elif self._i == 1:
+                elif self._w == 1:
                     if self._z:
                         data = self._z.compress(data) + self._z.flush()
                         self.size = len(data)
                     self._fp.write(data)
-                self._i += 1
+                self._w += 1
 
+        zopflify = self._zopflify(compress_type)
+        if zopflify:
+            compress_type = zipfile.ZIP_STORED
+            opts = self._options.copy()
+            opts.update(kwargs)
+            z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
+        else:
+            z = None
         fp = self.fp
         try:
-            zopflify = self._zopflify(compress_type)
-            if zopflify:
-                compress_type = zipfile.ZIP_STORED
-                opts = self._options.copy()
-                opts.update(kwargs)
-                z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
-            else:
-                z = None
             self.fp = ZopfliFile(self, z)
             super(ZipFile, self).writestr(zinfo_or_arcname, data, compress_type)
             zi = self._convert(self.filelist[-1])
