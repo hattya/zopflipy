@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -230,8 +230,8 @@ class ZipFile(zipfile.ZipFile, object):
 
     def _rewrite(self, fh):
         n = struct.unpack('<H', fh[26:28])[0]
-        name = fh[30:30 + n].decode('utf-8').encode(self.encoding)
-        return fh[:30] + name + fh[30 + n:]
+        name = fh[30:30+n].decode('utf-8').encode(self.encoding)
+        return fh[:30] + name + fh[30+n:]
 
     def _zip64(self, zi):
         return (zipfile.ZIP64_LIMIT < zi.file_size or

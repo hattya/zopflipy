@@ -1,7 +1,7 @@
 //
-// _zopfli/zopflipng.cpp
+// _zopfli :: zopflipng.cpp
 //
-//   Copyright (c) 2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -20,6 +20,52 @@
 
 #include "zopflipng/zopflipng_lib.h"
 #include "zopflipng/lodepng/lodepng.h"
+
+
+template<typename T>
+static inline void clear(T*& p) {
+    delete p;
+    p = 0;
+}
+
+static inline PyObject* int_FromLong(long i) {
+#if PY_MAJOR_VERSION < 3
+    return PyInt_FromLong(i);
+#else
+    return PyLong_FromLong(i);
+#endif
+}
+
+static inline PyObject* str_AsASCIIString(PyObject* u) {
+#if PY_MAJOR_VERSION < 3
+    if (!PyUnicode_Check(u)) {
+        Py_INCREF(u);
+        return u;
+    }
+#endif
+    return PyUnicode_AsASCIIString(u);
+}
+
+static inline bool str_Check(PyObject* v) {
+#if PY_MAJOR_VERSION < 3
+    if (PyBytes_Check(v) ||
+        PyUnicode_Check(v)) {
+#else
+    if (PyUnicode_Check(v)) {
+#endif
+        return true;
+    }
+    PyErr_Format(PyExc_TypeError, "expected str, got '%.200s'", Py_TYPE(v)->tp_name);
+    return false;
+}
+
+static inline PyObject* str_FromString(const char* s) {
+#if PY_MAJOR_VERSION < 3
+    return PyBytes_FromString(s);
+#else
+    return PyUnicode_FromString(s);
+#endif
+}
 
 
 struct PNG {
@@ -44,48 +90,11 @@ static int PNG_clear(PNG* self) {
     return 0;
 }
 
-template<typename T>
-static inline void clear(T*& p) {
-    delete p;
-    p = 0;
-}
-
 static void PNG_dealloc(PNG* self) {
     PNG_clear(self);
     clear(self->options);
     FREE_LOCK(self);
     Py_TYPE(self)->tp_free(reinterpret_cast<PyObject*>(self));
-}
-
-static inline PyObject* str_FromString(const char* s) {
-#if PY_MAJOR_VERSION < 3
-    return PyBytes_FromString(s);
-#else
-    return PyUnicode_FromString(s);
-#endif
-}
-
-static inline bool str_Check(PyObject* v) {
-#if PY_MAJOR_VERSION < 3
-    if (PyBytes_Check(v) ||
-        PyUnicode_Check(v)) {
-#else
-    if (PyUnicode_Check(v)) {
-#endif
-        return true;
-    }
-    PyErr_Format(PyExc_TypeError, "expected str, got '%.200s'", Py_TYPE(v)->tp_name);
-    return false;
-}
-
-static inline PyObject* str_AsASCIIString(PyObject* u) {
-#if PY_MAJOR_VERSION < 3
-    if (!PyUnicode_Check(u)) {
-        Py_INCREF(u);
-        return u;
-    }
-#endif
-    return PyUnicode_AsASCIIString(u);
 }
 
 static int parse_filter_strategies(PNG* self, PyObject* filter_strategies) {
@@ -336,8 +345,7 @@ out:
 }
 
 static PyMethodDef PNG_methods[] = {
-    {"optimize", reinterpret_cast<PyCFunction>(PNG_optimize), METH_O,
-     PNG_optimize__doc__},
+    {"optimize", reinterpret_cast<PyCFunction>(PNG_optimize), METH_O, PNG_optimize__doc__},
     {0},
 };
 
@@ -384,11 +392,7 @@ static PyObject* PNG_get_int(PNG* self, void* closure) {
         v = self->options->block_split_strategy;
     }
 
-#if PY_MAJOR_VERSION < 3
-    return PyInt_FromLong(v);
-#else
-    return PyLong_FromLong(v);
-#endif
+    return int_FromLong(v);
 }
 
 #define GET_SET(v, tp) \
@@ -429,7 +433,7 @@ PyTypeObject PNG_Type = {
     0,                                            // tp_setattro
     0,                                            // tp_as_buffer
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
-    Py_TPFLAGS_HAVE_GC,                           // tp_flags
+        Py_TPFLAGS_HAVE_GC,                       // tp_flags
     PNG__doc__,                                   // tp_doc
     reinterpret_cast<traverseproc>(PNG_traverse), // tp_traverse
     reinterpret_cast<inquiry>(PNG_clear),         // tp_clear

@@ -1,7 +1,7 @@
 #
 # test_zopfli
 #
-#   Copyright (c) 2015 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ class ZipFileTest(unittest.TestCase):
         folder = '{New Folder}'
         os.mkdir(u(os.path.join(self.path, folder)))
         with zopfli.ZipFile(path, 'w', encoding=encoding) as zf:
-            zf.write(u(os.path.join(self.path, folder)))
+            zf.write(u(os.path.join(self.path, folder)), u(folder))
             write(zf, u(os.path.join(folder, '{spam}.txt')))
             write(zf, u(os.path.join(folder, '{eggs}.txt')), deflate=False)
             writestr(zf, u(os.path.join(folder, '{ham}.txt')))
@@ -321,7 +321,7 @@ class ZipFileTest(unittest.TestCase):
                                      ('{bacon}.txt', zipfile.ZIP_DEFLATED),
                                      ('{sausage}.txt', zipfile.ZIP_STORED),
                                      ('{tomato}.txt', zipfile.ZIP_STORED)):
-                name = u(os.path.join(folder, n)).replace(os.path.sep, '/')
+                name = u(os.path.join(folder, n)).replace(os.sep, '/')
                 raw_name = name.encode(encoding)
                 if sys.version_info >= (3, 0):
                     raw_name = raw_name.decode('utf-8' if encoding == 'utf-8' else 'cp437')

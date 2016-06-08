@@ -1,7 +1,7 @@
 /*
- * _zopfli/_zopflimodule.c
+ * _zopfli :: _zopflimodule.c
  *
- *   Copyright (c) 2015 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -207,10 +207,8 @@ out:
 }
 
 static PyMethodDef Compressor_methods[] = {
-    {"compress", (PyCFunction)Compressor_compress, METH_O,
-     Compressor_compress__doc__},
-    {"flush",    (PyCFunction)Compressor_flush,    METH_NOARGS,
-     Compressor_flush__doc__},
+    {"compress", (PyCFunction)Compressor_compress, METH_O,      Compressor_compress__doc__},
+    {"flush",    (PyCFunction)Compressor_flush,    METH_NOARGS, Compressor_flush__doc__},
     {0},
 };
 
@@ -424,10 +422,8 @@ out:
 }
 
 static PyMethodDef Deflater_methods[] = {
-    {"compress", (PyCFunction)Deflater_compress, METH_O,
-     Deflater_compress__doc__},
-    {"flush",    (PyCFunction)Deflater_flush,    METH_NOARGS,
-     Deflater_flush__doc__},
+    {"compress", (PyCFunction)Deflater_compress, METH_O,      Deflater_compress__doc__},
+    {"flush",    (PyCFunction)Deflater_flush,    METH_NOARGS, Deflater_flush__doc__},
     {0},
 };
 
