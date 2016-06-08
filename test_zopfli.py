@@ -313,15 +313,16 @@ class ZipFileTest(unittest.TestCase):
             writestr(zf, u(os.path.join(folder, '{sausage}.txt')), deflate=False, zinfo=True)
             write(zf, u(os.path.join(folder, '{tomato}.txt')), deflate=False)
         with zopfli.ZipFile(path, 'r', encoding=encoding) as zf:
-            for n, compress_type in (('{spam}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{eggs}.txt', zipfile.ZIP_STORED),
-                                     ('{ham}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{toast}.txt', zipfile.ZIP_STORED),
-                                     ('{beans}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{bacon}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{sausage}.txt', zipfile.ZIP_STORED),
-                                     ('{tomato}.txt', zipfile.ZIP_STORED)):
-                name = u(os.path.join(folder, n)).replace(os.sep, '/')
+            for n, compress_type in (('{New Folder}/', zipfile.ZIP_STORED),
+                                     ('{New Folder}/{spam}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{New Folder}/{eggs}.txt', zipfile.ZIP_STORED),
+                                     ('{New Folder}/{ham}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{New Folder}/{toast}.txt', zipfile.ZIP_STORED),
+                                     ('{New Folder}/{beans}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{New Folder}/{bacon}.txt', zipfile.ZIP_DEFLATED),
+                                     ('{New Folder}/{sausage}.txt', zipfile.ZIP_STORED),
+                                     ('{New Folder}/{tomato}.txt', zipfile.ZIP_STORED)):
+                name = u(n)
                 raw_name = name.encode(encoding)
                 if sys.version_info >= (3, 0):
                     raw_name = raw_name.decode('utf-8' if encoding == 'utf-8' else 'cp437')
@@ -330,7 +331,7 @@ class ZipFileTest(unittest.TestCase):
                 self.assertEqual(zi.filename, name)
                 self.assertEqual(zi.compress_type, compress_type)
                 self.assertEqual(zi.flag_bits, 0x800 if encoding == 'utf-8' else 0)
-                self.assertEqual(zf.read(zi), u(os.path.splitext(n)[0]).encode(encoding))
+                self.assertEqual(zf.read(zi), os.path.splitext(os.path.basename(name))[0].encode(encoding))
 
     def _u(self, names):
         if sys.version_info < (3, 0):

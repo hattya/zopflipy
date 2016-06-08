@@ -139,9 +139,9 @@ class ZipFile(zipfile.ZipFile, object):
             super(ZipFile, self).write(filename, arcname, compress_type)
             zi = self._convert(self.filelist[-1])
             if zopflify:
-                zi.compress_type = zipfile.ZIP_DEFLATED
                 zi.compress_size = self.fp.size
                 if not zi.filename.endswith('/'):
+                    zi.compress_type = zipfile.ZIP_DEFLATED
                     fp.seek(self.fp.pos)
         finally:
             self.fp = fp
