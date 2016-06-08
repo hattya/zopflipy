@@ -136,6 +136,29 @@ class ZopfliPNGTestCase(unittest.TestCase):
         self.assertEqual(png.iterations, 15)
         self.assertEqual(png.iterations_large, 5)
 
+        png.verbose = True
+        png.lossy_transparent = True
+        png.lossy_8bit = True
+        png.filter_strategies = '01234mepb'
+        png.keep_chunks = ['tEXt', 'zTXt', 'iTXt']
+        png.use_zopfli = False
+        png.iterations = 30
+        png.iterations_large = 10
+        self.assertTrue(png.verbose)
+        self.assertTrue(png.lossy_transparent)
+        self.assertTrue(png.lossy_8bit)
+        self.assertEqual(png.filter_strategies, '01234mepb')
+        self.assertFalse(png.auto_filter_strategy)
+        self.assertEqual(png.keep_chunks, ('tEXt', 'zTXt', 'iTXt'))
+        self.assertFalse(png.use_zopfli)
+        self.assertEqual(png.iterations, 30)
+        self.assertEqual(png.iterations_large, 10)
+
+        with self.assertRaises(ValueError):
+            png.filter_strategies = '.'
+        self.assertTrue(png.auto_filter_strategy)
+        self.assertEqual(png.filter_strategies, '')
+
         png = zopfli.ZopfliPNG(verbose=True,
                                lossy_transparent=True,
                                lossy_8bit=True,
@@ -155,6 +178,9 @@ class ZopfliPNGTestCase(unittest.TestCase):
         self.assertEqual(png.iterations_large, 10)
 
         with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().verbose
+
+        with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(filter_strategies=None)
         with self.assertRaises(ValueError):
             zopfli.ZopfliPNG(filter_strategies=u'\u00B7')
@@ -170,9 +196,17 @@ class ZopfliPNGTestCase(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(iterations=None)
+        with self.assertRaises(TypeError):
+            zopfli.ZopfliPNG().iterations = None
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().iterations
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(iterations_large=None)
+        with self.assertRaises(TypeError):
+            zopfli.ZopfliPNG().iterations_large = None
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().iterations_large
 
     def test_optimize(self):
         png = zopfli.ZopfliPNG()

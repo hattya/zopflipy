@@ -341,16 +341,37 @@ static PyMethodDef PNG_methods[] = {
     {0},
 };
 
-#define MEMBER(v, tp) \
-    {const_cast<char*>(#v), tp, offsetof(PNG, v), READONLY}
+static PyObject* PNG_get_object(PNG* self, void* closure) {
+    const char *s = static_cast<char*>(closure);
+    PyObject* v = 0;
+    if (strcmp(s, "filter_strategies") == 0) {
+        v = self->filter_strategies;
+    } else if (strcmp(s, "keep_chunks") == 0) {
+        v = self->keep_chunks;
+    }
 
-static PyMemberDef PNG_members[] = {
-    MEMBER(filter_strategies, T_OBJECT),
-    MEMBER(keep_chunks,       T_OBJECT),
-    {0},
-};
+    Py_INCREF(v);
+    return v;
+}
 
-#undef MEMBER
+static int PNG_set_object(PNG* self, PyObject* value, void* closure) {
+    const char* s = static_cast<char*>(closure);
+    if (value == 0) {
+        PyErr_Format(PyExc_TypeError, "cannot delete %s", s);
+        return -1;
+    }
+
+    if (strcmp(s, "filter_strategies") == 0) {
+        if (parse_filter_strategies(self, value) < 0) {
+            return -1;
+        }
+    } else if (strcmp(s, "keep_chunks") == 0) {
+        if (parse_keep_chunks(self, value) < 0) {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 static PyObject* PNG_get_bool(PNG* self, void* closure) {
     const char *s = static_cast<char*>(closure);
@@ -373,6 +394,32 @@ static PyObject* PNG_get_bool(PNG* self, void* closure) {
     Py_RETURN_FALSE;
 }
 
+static int PNG_set_bool(PNG* self, PyObject* value, void* closure) {
+    const char* s = static_cast<char*>(closure);
+    if (value == 0) {
+        PyErr_Format(PyExc_TypeError, "cannot delete %s", s);
+        return -1;
+    }
+    int b = PyObject_IsTrue(value);
+    if (b < 0) {
+        return -1;
+    }
+    bool v = !!b;
+
+    if (strcmp(s, "verbose") == 0) {
+        self->options->verbose = v;
+    } else if (strcmp(s, "lossy_transparent") == 0) {
+        self->options->lossy_transparent = v;
+    } else if (strcmp(s, "lossy_8bit") == 0) {
+        self->options->lossy_8bit = v;
+    } else if (strcmp(s, "auto_filter_strategy") == 0) {
+        self->options->auto_filter_strategy = v;
+    } else if (strcmp(s, "use_zopfli") == 0) {
+        self->options->use_zopfli = v;
+    }
+    return 0;
+}
+
 static PyObject* PNG_get_int(PNG* self, void* closure) {
     const char* s = static_cast<char*>(closure);
     long v = 0;
@@ -385,10 +432,31 @@ static PyObject* PNG_get_int(PNG* self, void* closure) {
     return int_FromLong(v);
 }
 
+static int PNG_set_int(PNG* self, PyObject* value, void* closure) {
+    const char* s = static_cast<char*>(closure);
+    if (value == 0) {
+        PyErr_Format(PyExc_TypeError, "cannot delete %s", s);
+        return -1;
+    }
+    long v = PyLong_AsLong(value);
+    if (PyErr_Occurred() != 0) {
+        return -1;
+    }
+
+    if (strcmp(s, "iterations") == 0) {
+        self->options->num_iterations = v;
+    } else if (strcmp(s, "iterations_large") == 0) {
+        self->options->num_iterations_large = v;
+    }
+    return 0;
+}
+
 #define GET_SET(v, tp) \
-    {const_cast<char*>(#v), reinterpret_cast<getter>(PNG_get_ ## tp), 0, 0, const_cast<char*>(#v)}
+    {const_cast<char*>(#v), reinterpret_cast<getter>(PNG_get_ ## tp), reinterpret_cast<setter>(PNG_set_ ## tp), 0, const_cast<char*>(#v)}
 
 static PyGetSetDef PNG_getset[] = {
+    GET_SET(filter_strategies,    object),
+    GET_SET(keep_chunks,          object),
     GET_SET(verbose,              bool),
     GET_SET(lossy_transparent,    bool),
     GET_SET(lossy_8bit,           bool),
@@ -431,7 +499,7 @@ PyTypeObject PNG_Type = {
     0,                                            // tp_iter
     0,                                            // tp_iternext
     PNG_methods,                                  // tp_methods
-    PNG_members,                                  // tp_members
+    0,                                            // tp_members
     PNG_getset,                                   // tp_getset
     0,                                            // tp_base
     0,                                            // tp_dict
