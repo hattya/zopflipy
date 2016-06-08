@@ -206,8 +206,7 @@ err:
 PyDoc_STRVAR(PNG__doc__,
 "ZopfliPNG(verbose=False, lossy_transparent=False, lossy_8bit=False,"
 " filter_strategies='', auto_filter_strategy=True, keep_chunks=None,"
-" use_zopfli=True, iterations=15, iterations_large=5,"
-" block_split_strategy=1)\n"
+" use_zopfli=True, iterations=15, iterations_large=5)\n"
 "\n"
 "Create a PNG optimizer which is using the ZopfliPNGOptimize()\n"
 "function for optimizing PNG files.\n"
@@ -224,7 +223,6 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
         "use_zopfli",
         "iterations",
         "iterations_large",
-        "block_split_strategy",
         0,
     };
 
@@ -238,7 +236,7 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
     clear(self->options);
     self->options = new ZopfliPNGOptions;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "|OOOOOOOiii:ZopfliPNG", const_cast<char**>(kwlist),
+                                     "|OOOOOOOii:ZopfliPNG", const_cast<char**>(kwlist),
                                      &verbose,
                                      &lossy_transparent,
                                      &lossy_8bit,
@@ -247,8 +245,7 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
                                      &keep_chunks,
                                      &use_zopfli,
                                      &self->options->num_iterations,
-                                     &self->options->num_iterations_large,
-                                     &self->options->block_split_strategy)) {
+                                     &self->options->num_iterations_large)) {
         return -1;
     }
 
@@ -286,10 +283,6 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
 
 #undef PARSE_OBJECT
 
-    if (self->options->block_split_strategy < 0 ||
-        3 < self->options->block_split_strategy) {
-        self->options->block_split_strategy = 1;
-    }
 #ifdef WITH_THREAD
     ALLOCATE_LOCK(self);
     if (PyErr_Occurred() != 0) {
@@ -313,7 +306,6 @@ static PyObject* PNG_optimize(PNG* self, PyObject* data) {
     Py_buffer in = {0};
     std::vector<unsigned char> out, buf;
     unsigned char* p;
-    lodepng::State st;
     ACQUIRE_LOCK(self);
     if (PyObject_GetBuffer(data, &in, PyBUF_CONTIG_RO) < 0) {
         goto out;
@@ -331,7 +323,7 @@ static PyObject* PNG_optimize(PNG* self, PyObject* data) {
     buf.clear();
     unsigned w, h;
     Py_BEGIN_ALLOW_THREADS
-    err = lodepng::decode(buf, w, h, st, out);
+    err = lodepng::decode(buf, w, h, out);
     Py_END_ALLOW_THREADS
     if (err) {
         PyErr_SetString(PyExc_ValueError, "verification failed");
@@ -388,8 +380,6 @@ static PyObject* PNG_get_int(PNG* self, void* closure) {
         v = self->options->num_iterations;
     } else if (strcmp(s, "iterations_large") == 0) {
         v = self->options->num_iterations_large;
-    } else if (strcmp(s, "block_split_strategy") == 0) {
-        v = self->options->block_split_strategy;
     }
 
     return int_FromLong(v);
@@ -406,7 +396,6 @@ static PyGetSetDef PNG_getset[] = {
     GET_SET(use_zopfli,           bool),
     GET_SET(iterations,           int),
     GET_SET(iterations_large,     int),
-    GET_SET(block_split_strategy, int),
     {0},
 };
 

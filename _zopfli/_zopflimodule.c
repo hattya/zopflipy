@@ -22,6 +22,15 @@
 #include "zopfli/deflate.h"
 
 
+#define PARSE_BOOL(self, var)                       \
+    do {                                            \
+        (self)->options.var = PyObject_IsTrue(var); \
+        if ((self)->options.var < 0) {              \
+            return -1;                              \
+        }                                           \
+    } while (0)
+
+
 typedef struct {
     PyObject_HEAD
     ZopfliFormat   format;
@@ -42,7 +51,7 @@ Compressor_dealloc(Compressor *self) {
 
 PyDoc_STRVAR(Compressor__doc__,
 "ZopfliCompressor(format=ZOPFLI_FORMAT_DEFLATE, verbose=False,"
-" iterations=15, block_splitting=1, block_splitting_max=15)\n"
+" iterations=15, block_splitting=True, block_splitting_max=15)\n"
 "\n"
 "Create a compressor object which is using the ZopfliCompress()\n"
 "function for compressing data.");
@@ -57,17 +66,18 @@ Compressor_init(Compressor *self, PyObject *args, PyObject *kwargs) {
         "block_splitting_max",
         NULL,
     };
-    PyObject *verbose, *io;
+    PyObject *verbose, *blocksplitting, *io;
 
     self->format = ZOPFLI_FORMAT_DEFLATE;
     ZopfliInitOptions(&self->options);
     verbose = Py_False;
+    blocksplitting = Py_True;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "|iOiii:ZopfliCompressor", kwlist,
+                                     "|iOiOi:ZopfliCompressor", kwlist,
                                      &self->format,
                                      &verbose,
                                      &self->options.numiterations,
-                                     &self->options.blocksplitting,
+                                     &blocksplitting,
                                      &self->options.blocksplittingmax)) {
         return -1;
     }
@@ -82,14 +92,8 @@ Compressor_init(Compressor *self, PyObject *args, PyObject *kwargs) {
         return -1;
     }
 
-    self->options.verbose = PyObject_IsTrue(verbose);
-    if (self->options.verbose < 0) {
-        return -1;
-    }
-    if (self->options.blocksplitting < 0 ||
-        3 < self->options.blocksplitting) {
-        self->options.blocksplitting = 1;
-    }
+    PARSE_BOOL(self, verbose);
+    PARSE_BOOL(self, blocksplitting);
 
     io = PyImport_ImportModule("io");
     if (io == NULL) {
@@ -170,30 +174,8 @@ Compressor_flush(Compressor *self) {
     out = NULL;
     outsize = 0;
     Py_BEGIN_ALLOW_THREADS
-    if (self->options.blocksplitting == 3) {
-        /* try block splitting first and last */
-        self->options.blocksplitting = 1;
-        self->options.blocksplittinglast = 0;
-        ZopfliCompress(&self->options, self->format, in.buf, in.len,
-                       &out, &outsize);
-
-        out2 = NULL;
-        outsize2 = 0;
-        self->options.blocksplittinglast = 1;
-        ZopfliCompress(&self->options, self->format, in.buf, in.len,
-                       &out2, &outsize2);
-
-        if (outsize < outsize2) {
-            free(out2);
-        } else {
-            free(out);
-            out = out2;
-            outsize = outsize2;
-        }
-    } else {
-        ZopfliCompress(&self->options, self->format, in.buf, in.len,
-                       &out, &outsize);
-    }
+    ZopfliCompress(&self->options, self->format, in.buf, in.len,
+                   &out, &outsize);
     Py_END_ALLOW_THREADS
 
     v = PyBytes_FromStringAndSize((char *)out, outsize);
@@ -276,7 +258,7 @@ Deflater_dealloc(Deflater *self) {
 }
 
 PyDoc_STRVAR(Deflater__doc__,
-"ZopfliDeflater(verbose=False, iterations=15, block_splitting=1,"
+"ZopfliDeflater(verbose=False, iterations=15, block_splitting=True,"
 " block_splitting_max=15)\n"
 "\n"
 "Create a compressor object which is using the ZopfliDeflatePart()\n"
@@ -291,27 +273,22 @@ Deflater_init(Deflater *self, PyObject *args, PyObject *kwargs) {
         "block_splitting_max",
         NULL,
     };
-    PyObject *verbose;
+    PyObject *verbose, *blocksplitting;
 
     ZopfliInitOptions(&self->options);
     verbose = Py_False;
+    blocksplitting = Py_True;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                "|Oiii:ZopfliDeflater", kwlist,
+                "|OiOi:ZopfliDeflater", kwlist,
                 &verbose,
                 &self->options.numiterations,
-                &self->options.blocksplitting,
+                &blocksplitting,
                 &self->options.blocksplittingmax)) {
         return -1;
     }
 
-    self->options.verbose = PyObject_IsTrue(verbose);
-    if (self->options.verbose < 0) {
-        return -1;
-    }
-    if (self->options.blocksplitting == 2) {
-        self->options.blocksplitting = 1;
-        self->options.blocksplittinglast = 1;
-    }
+    PARSE_BOOL(self, verbose);
+    PARSE_BOOL(self, blocksplitting);
 
     self->bp = 0;
     free(self->out);

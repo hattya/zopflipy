@@ -45,7 +45,7 @@ class ZopfliTestCase(unittest.TestCase):
         self._test_zopfli(zopfli.ZOPFLI_FORMAT_DEFLATE)
 
     def _test_zopfli(self, fmt):
-        for i in range(-1, 5):
+        for i in range(2):
             c = zopfli.ZopfliCompressor(fmt, block_splitting=i)
             b = b'Hello, world!'
             z = c.compress(b) + c.flush()
@@ -67,14 +67,14 @@ class ZopfliTestCase(unittest.TestCase):
             c.compress(None)
 
         c = zopfli.ZopfliCompressor()
-        self.assertEqual(c.flush(), b'')
+        self.assertEqual(c.flush(), b'\x03\x00')
         with self.assertRaises(ValueError):
             c.compress(b'')
         with self.assertRaises(ValueError):
             c.flush()
 
     def test_deflater(self):
-        for i in range(3):
+        for i in range(2):
             c = zopfli.ZopfliDeflater(block_splitting=i)
             b = b'Hello, world!'
             z = c.compress(b) + c.flush()
@@ -87,9 +87,6 @@ class ZopfliTestCase(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliDeflater(iterations=None)
-
-        with self.assertRaises(TypeError):
-            zopfli.ZopfliDeflater(block_splitting=None)
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliDeflater(block_splitting_max=None)
@@ -138,7 +135,6 @@ class ZopfliPNGTestCase(unittest.TestCase):
         self.assertTrue(png.use_zopfli)
         self.assertEqual(png.iterations, 15)
         self.assertEqual(png.iterations_large, 5)
-        self.assertEqual(png.block_split_strategy, 1)
 
         png = zopfli.ZopfliPNG(verbose=True,
                                lossy_transparent=True,
@@ -147,8 +143,7 @@ class ZopfliPNGTestCase(unittest.TestCase):
                                keep_chunks=['tEXt', 'zTXt', 'iTXt'],
                                use_zopfli=False,
                                iterations=30,
-                               iterations_large=10,
-                               block_split_strategy=3)
+                               iterations_large=10)
         self.assertTrue(png.verbose)
         self.assertTrue(png.lossy_transparent)
         self.assertTrue(png.lossy_8bit)
@@ -158,7 +153,6 @@ class ZopfliPNGTestCase(unittest.TestCase):
         self.assertFalse(png.use_zopfli)
         self.assertEqual(png.iterations, 30)
         self.assertEqual(png.iterations_large, 10)
-        self.assertEqual(png.block_split_strategy, 3)
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(filter_strategies=None)
@@ -179,13 +173,6 @@ class ZopfliPNGTestCase(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(iterations_large=None)
-
-        png = zopfli.ZopfliPNG(block_split_strategy=-1)
-        self.assertEqual(png.block_split_strategy, 1)
-        png = zopfli.ZopfliPNG(block_split_strategy=4)
-        self.assertEqual(png.block_split_strategy, 1)
-        with self.assertRaises(TypeError):
-            zopfli.ZopfliPNG(block_split_strategy=None)
 
     def test_optimize(self):
         png = zopfli.ZopfliPNG()
