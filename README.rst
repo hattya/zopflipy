@@ -3,10 +3,10 @@ ZopfliPy
 
 A Python_ bindings for Zopfli_.
 
-.. image:: https://drone.io/github.com/hattya/zopflipy/status.png
-   :target: https://drone.io/github.com/hattya/zopflipy/latest
+.. image:: https://semaphoreci.com/api/v1/hattya/zopflipy/branches/master/badge.svg
+   :target: https://semaphoreci.com/hattya/zopflipy
 
-.. image:: https://ci.appveyor.com/api/projects/status/98a7e7d6qlkvs6vl?svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/98a7e7d6qlkvs6vl/branch/master?svg=true
    :target: https://ci.appveyor.com/project/hattya/zopflipy
 
 .. _Python: https://www.python.org/
