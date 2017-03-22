@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2017 Akinori Hattori <hattya@gmail.com>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -82,11 +82,9 @@ class ZipFile(zipfile.ZipFile, object):
         for i, zi in enumerate(self.filelist):
             self.filelist[i] = zi = self._convert(zi)
             if not zi.flag_bits & 0x800:
-                n = zi.orig_filename
-                n = (n if py2 else n.encode('cp437')).decode(self.encoding)
-                if (os.path.sep != '/' and
-                    os.path.sep in n):
-                    n = n.replace(os.path.sep, '/')
+                n = (zi.orig_filename if py2 else zi.orig_filename.encode('cp437')).decode(self.encoding)
+                if os.sep != '/':
+                    n = n.replace(os.sep, '/')
                 del self.NameToInfo[zi.filename]
                 zi.filename = n
             self.NameToInfo[zi.filename] = zi
