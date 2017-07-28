@@ -24,7 +24,7 @@ Installation
 
 .. code:: console
 
-   $ git clone --recursive https://github.com/hattya/zopfipy
+   $ git clone --recursive https://github.com/hattya/zopflipy
    $ cd zopflipy
    $ python setup.py install
 
