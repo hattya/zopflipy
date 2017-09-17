@@ -9,6 +9,9 @@ A Python_ bindings for Zopfli_.
 .. image:: https://ci.appveyor.com/api/projects/status/98a7e7d6qlkvs6vl/branch/master?svg=true
    :target: https://ci.appveyor.com/project/hattya/zopflipy
 
+.. image:: https://codecov.io/gh/hattya/zopflipy/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/hattya/zopflipy
+
 .. _Python: https://www.python.org/
 .. _Zopfli: https://github.com/google/zopfli
 
