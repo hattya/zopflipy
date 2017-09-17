@@ -32,8 +32,8 @@ def list_sources(path, exts):
         dirs[:] = (d for d in dirs if not d.startswith('.'))
         for f in files:
             n, ext = os.path.splitext(f)
-            if (ext in exts and
-                not n.endswith('_bin')):
+            if (ext in exts
+                and not n.endswith('_bin')):
                 srcs.append(os.path.normpath(os.path.join(root, f)))
     return srcs
 

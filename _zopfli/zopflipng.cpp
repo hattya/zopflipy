@@ -1,7 +1,7 @@
 //
 // _zopfli :: zopflipng.cpp
 //
-//   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2015-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ static inline PyObject* str_AsASCIIString(PyObject* u) {
 
 static inline bool str_Check(PyObject* v) {
 #if PY_MAJOR_VERSION < 3
-    if (PyBytes_Check(v) ||
-        PyUnicode_Check(v)) {
+    if (PyBytes_Check(v)
+        || PyUnicode_Check(v)) {
 #else
     if (PyUnicode_Check(v)) {
 #endif

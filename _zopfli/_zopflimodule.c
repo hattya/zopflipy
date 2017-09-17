@@ -1,7 +1,7 @@
 /*
  * _zopfli :: _zopflimodule.c
  *
- *   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2017 Akinori Hattori <hattya@gmail.com>
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -474,9 +474,9 @@ PyInit__zopfli(void) {
     if (m == NULL) {
         goto err;
     }
-    if (PyModule_AddIntMacro(m, ZOPFLI_FORMAT_GZIP) < 0 ||
-        PyModule_AddIntMacro(m, ZOPFLI_FORMAT_ZLIB) < 0 ||
-        PyModule_AddIntMacro(m, ZOPFLI_FORMAT_DEFLATE) < 0) {
+    if (PyModule_AddIntMacro(m, ZOPFLI_FORMAT_GZIP) < 0
+        || PyModule_AddIntMacro(m, ZOPFLI_FORMAT_ZLIB) < 0
+        || PyModule_AddIntMacro(m, ZOPFLI_FORMAT_DEFLATE) < 0) {
         goto err;
     }
 
