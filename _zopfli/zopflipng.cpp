@@ -91,6 +91,7 @@ static int PNG_clear(PNG* self) {
 }
 
 static void PNG_dealloc(PNG* self) {
+    PyObject_GC_UnTrack(self);
     PNG_clear(self);
     clear(self->options);
     FREE_LOCK(self);
