@@ -1,7 +1,7 @@
 #
 # test_zopfli
 #
-#   Copyright (c) 2015-2016 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2017 Akinori Hattori <hattya@gmail.com>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -124,61 +124,66 @@ black_png = (
 
 class ZopfliPNGTestCase(unittest.TestCase):
 
-    def test_png(self):
+    def test_verbose(self):
         png = zopfli.ZopfliPNG()
         self.assertFalse(png.verbose)
-        self.assertFalse(png.lossy_transparent)
-        self.assertFalse(png.lossy_8bit)
-        self.assertEqual(png.filter_strategies, '')
-        self.assertTrue(png.auto_filter_strategy)
-        self.assertEqual(png.keep_chunks, ())
-        self.assertTrue(png.use_zopfli)
-        self.assertEqual(png.iterations, 15)
-        self.assertEqual(png.iterations_large, 5)
 
         png.verbose = True
-        png.lossy_transparent = True
-        png.lossy_8bit = True
-        png.filter_strategies = '01234mepb'
-        png.keep_chunks = ['tEXt', 'zTXt', 'iTXt']
-        png.use_zopfli = False
-        png.iterations = 30
-        png.iterations_large = 10
         self.assertTrue(png.verbose)
-        self.assertTrue(png.lossy_transparent)
-        self.assertTrue(png.lossy_8bit)
-        self.assertEqual(png.filter_strategies, '01234mepb')
-        self.assertFalse(png.auto_filter_strategy)
-        self.assertEqual(png.keep_chunks, ('tEXt', 'zTXt', 'iTXt'))
-        self.assertFalse(png.use_zopfli)
-        self.assertEqual(png.iterations, 30)
-        self.assertEqual(png.iterations_large, 10)
 
-        with self.assertRaises(ValueError):
-            png.filter_strategies = '.'
-        self.assertTrue(png.auto_filter_strategy)
-        self.assertEqual(png.filter_strategies, '')
-
-        png = zopfli.ZopfliPNG(verbose=True,
-                               lossy_transparent=True,
-                               lossy_8bit=True,
-                               filter_strategies='01234mepb',
-                               keep_chunks=['tEXt', 'zTXt', 'iTXt'],
-                               use_zopfli=False,
-                               iterations=30,
-                               iterations_large=10)
+        png = zopfli.ZopfliPNG(verbose=True)
         self.assertTrue(png.verbose)
-        self.assertTrue(png.lossy_transparent)
-        self.assertTrue(png.lossy_8bit)
-        self.assertEqual(png.filter_strategies, '01234mepb')
-        self.assertFalse(png.auto_filter_strategy)
-        self.assertEqual(png.keep_chunks, ('tEXt', 'zTXt', 'iTXt'))
-        self.assertFalse(png.use_zopfli)
-        self.assertEqual(png.iterations, 30)
-        self.assertEqual(png.iterations_large, 10)
 
         with self.assertRaises(TypeError):
             del zopfli.ZopfliPNG().verbose
+
+    def test_lossy_transparent(self):
+        png = zopfli.ZopfliPNG()
+        self.assertFalse(png.lossy_transparent)
+
+        png.lossy_transparent = True
+        self.assertTrue(png.lossy_transparent)
+
+        png = zopfli.ZopfliPNG(lossy_transparent=True)
+        self.assertTrue(png.lossy_transparent)
+
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().lossy_transparent
+
+    def test_lossy_8bit(self):
+        png = zopfli.ZopfliPNG()
+        self.assertFalse(png.lossy_8bit)
+
+        png.lossy_8bit = True
+        self.assertTrue(png.lossy_8bit)
+
+        png = zopfli.ZopfliPNG(lossy_8bit=True)
+        self.assertTrue(png.lossy_8bit)
+
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().lossy_8bit
+
+    def test_filter_strategies(self):
+        png = zopfli.ZopfliPNG()
+        self.assertEqual(png.filter_strategies, '')
+        self.assertTrue(png.auto_filter_strategy)
+
+        png.filter_strategies = '01234mepb'
+        self.assertEqual(png.filter_strategies, '01234mepb')
+        self.assertFalse(png.auto_filter_strategy)
+
+        with self.assertRaises(ValueError):
+            png.filter_strategies = '.'
+        self.assertEqual(png.filter_strategies, '')
+        self.assertTrue(png.auto_filter_strategy)
+
+        png = zopfli.ZopfliPNG(filter_strategies='01234mepb')
+        self.assertEqual(png.filter_strategies, '01234mepb')
+        self.assertFalse(png.auto_filter_strategy)
+
+        png.auto_filter_strategy = True
+        self.assertEqual(png.filter_strategies, '')
+        self.assertTrue(png.auto_filter_strategy)
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(filter_strategies=None)
@@ -186,6 +191,21 @@ class ZopfliPNGTestCase(unittest.TestCase):
             zopfli.ZopfliPNG(filter_strategies=u'\u00B7')
         with self.assertRaises(ValueError):
             zopfli.ZopfliPNG(filter_strategies='z')
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().filter_strategies
+
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().auto_filter_strategy
+
+    def test_keep_chunks(self):
+        png = zopfli.ZopfliPNG()
+        self.assertEqual(png.keep_chunks, ())
+
+        png.keep_chunks = ['tEXt', 'zTXt', 'iTXt']
+        self.assertEqual(png.keep_chunks, ('tEXt', 'zTXt', 'iTXt'))
+
+        png = zopfli.ZopfliPNG(keep_chunks=['tEXt', 'zTXt', 'iTXt'])
+        self.assertEqual(png.keep_chunks, ('tEXt', 'zTXt', 'iTXt'))
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(keep_chunks=None)
@@ -193,6 +213,31 @@ class ZopfliPNGTestCase(unittest.TestCase):
             zopfli.ZopfliPNG(keep_chunks=[None])
         with self.assertRaises(ValueError):
             zopfli.ZopfliPNG(keep_chunks=[u'\u00B7'])
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().keep_chunks
+
+    def test_use_zopfli(self):
+        png = zopfli.ZopfliPNG()
+        self.assertTrue(png.use_zopfli)
+
+        png.use_zopfli = False
+        self.assertFalse(png.use_zopfli)
+
+        png = zopfli.ZopfliPNG(use_zopfli=False)
+        self.assertFalse(png.use_zopfli)
+
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().use_zopfli
+
+    def test_iterations(self):
+        png = zopfli.ZopfliPNG()
+        self.assertEqual(png.iterations, 15)
+
+        png.iterations *= 2
+        self.assertEqual(png.iterations, 30)
+
+        png = zopfli.ZopfliPNG(iterations=30)
+        self.assertEqual(png.iterations, 30)
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(iterations=None)
@@ -200,6 +245,16 @@ class ZopfliPNGTestCase(unittest.TestCase):
             zopfli.ZopfliPNG().iterations = None
         with self.assertRaises(TypeError):
             del zopfli.ZopfliPNG().iterations
+
+    def test_iterations_large(self):
+        png = zopfli.ZopfliPNG()
+        self.assertEqual(png.iterations_large, 5)
+
+        png.iterations_large *= 2
+        self.assertEqual(png.iterations_large, 10)
+
+        png = zopfli.ZopfliPNG(iterations_large=10)
+        self.assertEqual(png.iterations_large, 10)
 
         with self.assertRaises(TypeError):
             zopfli.ZopfliPNG(iterations_large=None)

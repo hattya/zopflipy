@@ -414,6 +414,11 @@ static int PNG_set_bool(PNG* self, PyObject* value, void* closure) {
     } else if (strcmp(s, "lossy_8bit") == 0) {
         self->options->lossy_8bit = v;
     } else if (strcmp(s, "auto_filter_strategy") == 0) {
+        if (v) {
+            Py_CLEAR(self->filter_strategies);
+            self->filter_strategies = str_FromString("");
+            self->options->filter_strategies.clear();
+        }
         self->options->auto_filter_strategy = v;
     } else if (strcmp(s, "use_zopfli") == 0) {
         self->options->use_zopfli = v;
