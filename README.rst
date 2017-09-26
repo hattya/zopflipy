@@ -3,6 +3,9 @@ ZopfliPy
 
 A Python_ bindings for Zopfli_.
 
+.. image:: https://img.shields.io/pypi/v/zopflipy.svg
+   :target: https://pypi.python.org/pypi/zopflipy
+
 .. image:: https://semaphoreci.com/api/v1/hattya/zopflipy/branches/master/badge.svg
    :target: https://semaphoreci.com/hattya/zopflipy
 
@@ -27,15 +30,7 @@ Installation
 
 .. code:: console
 
-   $ git clone --recursive https://github.com/hattya/zopflipy
-   $ cd zopflipy
-   $ python setup.py install
-
-or
-
-.. code:: console
-
-   $ pip install git+https://github.com/hattya/zopflipy
+   $ pip install zopflipy
 
 
 Usage
