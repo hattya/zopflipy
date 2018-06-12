@@ -19,7 +19,7 @@ try:
         for l in fp:
             if l.startswith('__version__ = '):
                 version = l.split('=', 2)[1].strip("\n '")
-except:
+except (OSError, IOError):
     pass
 
 
@@ -69,7 +69,7 @@ class test(Command):
 try:
     with open('README.rst') as fp:
         long_description = fp.read()
-except:
+except (OSError, IOError):
     long_description = ''
 
 py_modules = ['zopfli']
