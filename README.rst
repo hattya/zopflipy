@@ -22,7 +22,7 @@ A Python_ bindings for Zopfli_.
 Requirements
 ------------
 
-- Python 2.7 or 3.3+
+- Python 2.7 or 3.4+
 
 
 Installation
