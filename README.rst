@@ -4,7 +4,7 @@ ZopfliPy
 A Python_ bindings for Zopfli_.
 
 .. image:: https://img.shields.io/pypi/v/zopflipy.svg
-   :target: https://pypi.python.org/pypi/zopflipy
+   :target: https://pypi.org/project/zopflipy
 
 .. image:: https://semaphoreci.com/api/v1/hattya/zopflipy/branches/master/badge.svg
    :target: https://semaphoreci.com/hattya/zopflipy
@@ -19,12 +19,6 @@ A Python_ bindings for Zopfli_.
 .. _Zopfli: https://github.com/google/zopfli
 
 
-Requirements
-------------
-
-- Python 2.7 or 3.4+
-
-
 Installation
 ------------
 
@@ -33,10 +27,17 @@ Installation
    $ pip install zopflipy
 
 
+Requirements
+------------
+
+- Python 2.7 or 3.4+
+
+
 Usage
 -----
 
-ZopfliCompressor:
+ZopfliCompressor
+~~~~~~~~~~~~~~~~
 
 .. code:: pycon
 
@@ -47,7 +48,9 @@ ZopfliCompressor:
    >>> d.decompress(z) + d.flush()
    b'Hello, world!''
 
-ZopfliDeflater:
+
+ZopfliDeflater
+~~~~~~~~~~~~~~
 
 .. code:: pycon
 
@@ -58,7 +61,9 @@ ZopfliDeflater:
    >>> d.decompress(z) + d.flush()
    b'Hello, world!''
 
-ZopfliPNG:
+
+ZopfliPNG
+~~~~~~~~~
 
 .. code:: pycon
 
