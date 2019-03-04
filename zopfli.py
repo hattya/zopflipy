@@ -103,7 +103,7 @@ class ZipFile(zipfile.ZipFile, object):
                 return getattr(self._fp, name)
 
             def seek(self, offset, whence=os.SEEK_SET):
-                if (0 < self._w
+                if (self._w > 0
                     and self._z):
                     data = self._z.flush()
                     self.size += len(data)
@@ -116,7 +116,7 @@ class ZipFile(zipfile.ZipFile, object):
             def write(self, data):
                 if self._w == 0:
                     self._fp.write(self._rewrite(data))
-                elif 0 < self._w:
+                elif self._w > 0:
                     if self._z:
                         data = self._z.compress(data)
                         self.size += len(data)
@@ -232,8 +232,8 @@ class ZipFile(zipfile.ZipFile, object):
         return fh[:30] + name + fh[30+n:]
 
     def _zip64(self, zi):
-        return (zipfile.ZIP64_LIMIT < zi.file_size
-                or zipfile.ZIP64_LIMIT < zi.compress_size)
+        return (zi.file_size > zipfile.ZIP64_LIMIT
+                or zi.compress_size > zipfile.ZIP64_LIMIT)
 
     def _zopflify(self, compression):
         return (compression == zipfile.ZIP_DEFLATED

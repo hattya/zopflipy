@@ -12,18 +12,15 @@ except ImportError:
     from distutils.core import setup, Command, Extension
 
 
+zopfli_dir = os.path.join('_zopfli', 'zopfli', 'src')
 version = 'unknown'
-
 try:
     with open('zopfli.py') as fp:
         for l in fp:
             if l.startswith('__version__ = '):
-                version = l.split('=', 2)[1].strip("\n '")
+                version = l.split('=', 1)[1].strip("\n '")
 except (OSError, IOError):
     pass
-
-
-zopfli_dir = os.path.join('_zopfli', 'zopfli', 'src')
 
 
 def list_sources(path, exts):
