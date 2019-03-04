@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2018 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2019 Akinori Hattori <hattya@gmail.com>
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ from _zopfli import (ZOPFLI_FORMAT_GZIP, ZOPFLI_FORMAT_ZLIB, ZOPFLI_FORMAT_DEFLA
                      ZopfliCompressor, ZopfliDeflater, ZopfliPNG)
 
 
-__version__ = '1.1'
+__version__ = '1.2-dev'
 __all__ = ['ZOPFLI_FORMAT_GZIP', 'ZOPFLI_FORMAT_ZLIB', 'ZOPFLI_FORMAT_DEFLATE',
            'ZopfliCompressor', 'ZopfliDeflater', 'ZopfliDecompressor', 'ZopfliPNG',
            'ZipFile', 'ZipInfo']
