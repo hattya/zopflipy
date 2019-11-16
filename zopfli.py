@@ -71,10 +71,12 @@ class ZopfliDecompressor(object):
 class ZipFile(zipfile.ZipFile, object):
 
     def __init__(self, file, mode='r', compression=zipfile.ZIP_DEFLATED,
-                 allowZip64=False, encoding='cp437', **kwargs):
+                 allowZip64=True, encoding='cp437', **kwargs):
         self.encoding = encoding
         self._options = kwargs
         super(ZipFile, self).__init__(file, mode, compression, allowZip64)
+        if sys.version_info >= (3, 8):
+            self._strict_timestamps = kwargs.pop('strict_timestamps', True)
 
     def _RealGetContents(self):
         super(ZipFile, self)._RealGetContents()
@@ -131,27 +133,36 @@ class ZipFile(zipfile.ZipFile, object):
             z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
         else:
             z = None
-        fp = self.fp
-        try:
-            self.fp = ZopfliFile(self, z)
-            super(ZipFile, self).write(filename, arcname, compress_type)
-            zi = self._convert(self.filelist[-1])
-            if zopflify:
-                zi.compress_size = self.fp.size
-                if not zi.filename.endswith('/'):
-                    zi.compress_type = zipfile.ZIP_DEFLATED
-                    fp.seek(self.fp.pos)
-        finally:
-            self.fp = fp
-        self.start_dir = self.fp.tell()
-        self.fp.seek(zi.header_offset)
-        if sys.version_info < (2, 7, 4):
-            self.fp.write(zi.FileHeader())
+        if sys.version_info >= (3, 5):
+            lock = self._lock
+            lock.acquire()
         else:
-            self.fp.write(zi.FileHeader(self._zip64(zi)))
-        self.fp.seek(self.start_dir)
-        self.filelist[-1] = zi
-        self.NameToInfo[zi.filename] = zi
+            lock = None
+        try:
+            fp = self.fp
+            try:
+                self.fp = ZopfliFile(self, z)
+                super(ZipFile, self).write(filename, arcname, compress_type)
+                zi = self._convert(self.filelist[-1])
+                if zopflify:
+                    zi.compress_size = self.fp.size
+                    if not zi.filename.endswith('/'):
+                        zi.compress_type = zipfile.ZIP_DEFLATED
+                        fp.seek(self.fp.pos)
+            finally:
+                self.fp = fp
+            self.start_dir = self.fp.tell()
+            self.fp.seek(zi.header_offset)
+            if sys.version_info < (2, 7, 4):
+                self.fp.write(zi.FileHeader())
+            else:
+                self.fp.write(zi.FileHeader(self._zip64(zi)))
+            self.fp.seek(self.start_dir)
+            self.filelist[-1] = zi
+            self.NameToInfo[zi.filename] = zi
+        finally:
+            if lock:
+                lock.release()
 
     def writestr(self, zinfo_or_arcname, data, compress_type=None, **kwargs):
         class ZopfliFile(object):
@@ -189,29 +200,34 @@ class ZipFile(zipfile.ZipFile, object):
             z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
         else:
             z = None
-        fp = self.fp
-        try:
-            self.fp = ZopfliFile(self, z, rw)
-            super(ZipFile, self).writestr(zinfo_or_arcname, data, compress_type)
-            zi = self._convert(self.filelist[-1])
-            if zopflify:
-                zi.compress_type = zipfile.ZIP_DEFLATED
-                zi.compress_size = self.fp.size
-                if zi.flag_bits & 0x08:
-                    data = struct.pack('<LQQ' if self._zip64(zi) else '<LLL',
-                                       zi.CRC, zi.compress_size, zi.file_size)
-                    fp.write(data)
-        finally:
-            self.fp = fp
-        self.start_dir = self.fp.tell()
-        self.fp.seek(zi.header_offset)
-        if sys.version_info < (2, 7, 4):
-            self.fp.write(zi.FileHeader())
+        if sys.version_info > (3, 5):
+            lock = self._lock
+            lock.acquire()
         else:
-            self.fp.write(zi.FileHeader(self._zip64(zi)))
-        self.fp.seek(self.start_dir)
-        self.filelist[-1] = zi
-        self.NameToInfo[zi.filename] = zi
+            lock = None
+        try:
+            fp = self.fp
+            try:
+                self.fp = ZopfliFile(self, z, rw)
+                super(ZipFile, self).writestr(zinfo_or_arcname, data, compress_type)
+                zi = self._convert(self.filelist[-1])
+                if zopflify:
+                    zi.compress_type = zipfile.ZIP_DEFLATED
+                    zi.compress_size = self.fp.size
+            finally:
+                self.fp = fp
+            self.start_dir = self.fp.tell()
+            self.fp.seek(zi.header_offset)
+            if sys.version_info < (2, 7, 4):
+                self.fp.write(zi.FileHeader())
+            else:
+                self.fp.write(zi.FileHeader(self._zip64(zi)))
+            self.fp.seek(self.start_dir)
+            self.filelist[-1] = zi
+            self.NameToInfo[zi.filename] = zi
+        finally:
+            if lock:
+                lock.release()
 
     def _convert(self, src):
         if isinstance(src, ZipInfo):
