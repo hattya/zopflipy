@@ -30,7 +30,7 @@ Installation
 Requirements
 ------------
 
-- Python 2.7 or 3.4+
+- Python 2.7 or 3.5+
 
 
 Usage

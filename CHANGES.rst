@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.2
+-----------
+
+* Drop Python 3.4 support.
+
+
 Version 1.1
 -----------
 
