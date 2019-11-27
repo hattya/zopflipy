@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.2
 -----------
 
+Release date: 2019-11-27
+
 * Drop Python 3.4 support.
 * Support Python 3.8.
 
