@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.3
+-----------
+
+* Update Zopfli to version 1.0.3.
+
+
 Version 1.2
 -----------
 
