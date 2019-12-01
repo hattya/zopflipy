@@ -19,7 +19,7 @@ from _zopfli import (ZOPFLI_FORMAT_GZIP, ZOPFLI_FORMAT_ZLIB, ZOPFLI_FORMAT_DEFLA
                      ZopfliCompressor, ZopfliDeflater, ZopfliPNG)
 
 
-__version__ = '1.2'
+__version__ = '1.3.dev'
 __all__ = ['ZOPFLI_FORMAT_GZIP', 'ZOPFLI_FORMAT_ZLIB', 'ZOPFLI_FORMAT_DEFLATE',
            'ZopfliCompressor', 'ZopfliDeflater', 'ZopfliDecompressor', 'ZopfliPNG',
            'ZipFile', 'ZipInfo']
