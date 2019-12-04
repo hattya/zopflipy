@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.3
 -----------
 
+Release date: 2019-12-04
+
 * Update Zopfli to version 1.0.3.
 
 
