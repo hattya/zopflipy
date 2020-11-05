@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2019 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2020 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -19,7 +19,7 @@ from _zopfli import (ZOPFLI_FORMAT_GZIP, ZOPFLI_FORMAT_ZLIB, ZOPFLI_FORMAT_DEFLA
                      ZopfliCompressor, ZopfliDeflater, ZopfliPNG)
 
 
-__version__ = '1.3'
+__version__ = '1.4.dev'
 __all__ = ['ZOPFLI_FORMAT_GZIP', 'ZOPFLI_FORMAT_ZLIB', 'ZOPFLI_FORMAT_DEFLATE',
            'ZopfliCompressor', 'ZopfliDeflater', 'ZopfliDecompressor', 'ZopfliPNG',
            'ZipFile', 'ZipInfo']
