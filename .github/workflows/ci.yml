@@ -1,0 +1,83 @@
+name: CI
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    strategy:
+      matrix:
+        platform:
+          - Linux
+          - macOS
+          - Windows
+        python-version:
+          - 2.7
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9
+        architecture:
+          - x86
+          - x64
+        include:
+          - platform: Linux
+            os: ubuntu-latest
+          - platform: macOS
+            os: macos-latest
+          - platform: Windows
+            os: windows-latest
+        exclude:
+          - platform: Linux
+            architecture: x86
+          - platform: macOS
+            architecture: x86
+      fail-fast: false
+    name: Python ${{ matrix.python-version }} (${{ matrix.architecture }}) on ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CFLAGS: -Wall -Wextra --coverage
+      CXXFLAGS: -Wall -Wextra --coverage
+      HOMEBREW_NO_ANALYTICS: 1
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
+      - name: Install Microsoft Visual C++ Compiler for Python 2.7
+        if: matrix.platform == 'Windows' && matrix.python-version == 2.7
+        run: choco install -y vcpython27
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip setuptools wheel
+          pip install -U coverage tox tox-venv
+      - name: Install LCOV on Linux
+        if: matrix.platform == 'Linux'
+        run: sudo apt install lcov
+      - name: Install LCOV on macOS
+        if: matrix.platform == 'macOS'
+        run: brew install lcov
+      - name: Test
+        run: tox -e py
+      - name: Generate LCOV trace file
+        if: matrix.platform != 'Windows'
+        run: |
+          lcov -c -d . -o lcov.info --no-external
+          lcov -r lcov.info "*/zopfli/*" -o lcov.info
+          rm -rf build
+      - name: Generate XML coverage report
+        run: coverage xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          flags: ${{ matrix.platform }}
+          env_vars: PYTHON_VERSION,ARCH
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+          ARCH: ${{ matrix.architecture }}
