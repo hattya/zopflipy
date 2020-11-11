@@ -1,0 +1,37 @@
+name: CodeQL
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 3'
+jobs:
+  analyze:
+    strategy:
+      matrix:
+        language:
+          - C++
+          - Python
+      fail-fast: false
+    name: ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Checkout pull request
+        if: github.event_name == 'pull_request'
+        run: git checkout HEAD^2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v1
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v1
