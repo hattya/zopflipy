@@ -1,7 +1,7 @@
 /*
  * _zopfli :: _zopflimodule.c
  *
- *   Copyright (c) 2015-2019 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2020 Akinori Hattori <hattya@gmail.com>
  *
  *   SPDX-License-Identifier: Apache-2.0
  */
@@ -139,8 +139,8 @@ static PyObject *
 Compressor_flush(Compressor *self) {
     PyObject *v, *b;
     Py_buffer in = {0};
-    unsigned char *out, *out2;
-    size_t outsize, outsize2;
+    unsigned char *out;
+    size_t outsize;
 
     v = NULL;
     b = NULL;
