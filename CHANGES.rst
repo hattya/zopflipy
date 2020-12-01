@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.5
+-----------
+
+* Update Zopfli to commit 6673e39fba6122c948c9ec34f07166812d473eb6.
+
+
 Version 1.4
 -----------
 
