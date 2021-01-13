@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.6
+-----------
+
+* Add ``keep_color_type`` attribute to the ``ZopfliPNG`` class.
+
+
 Version 1.5
 -----------
 

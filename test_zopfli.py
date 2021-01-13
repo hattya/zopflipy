@@ -1,7 +1,7 @@
 #
 # test_zopfli
 #
-#   Copyright (c) 2015-2019 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -186,6 +186,19 @@ class ZopfliPNGTestCase(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             del zopfli.ZopfliPNG().auto_filter_strategy
+
+    def test_keep_color_type(self):
+        png = zopfli.ZopfliPNG()
+        self.assertFalse(png.keep_color_type)
+
+        png.keep_color_type = True
+        self.assertTrue(png.keep_color_type)
+
+        png = zopfli.ZopfliPNG(keep_color_type=True)
+        self.assertTrue(png.keep_color_type)
+
+        with self.assertRaises(TypeError):
+            del zopfli.ZopfliPNG().keep_color_type
 
     def test_keep_chunks(self):
         png = zopfli.ZopfliPNG()

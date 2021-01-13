@@ -1,7 +1,7 @@
 //
 // _zopfli :: zopflipng.cpp
 //
-//   Copyright (c) 2015-2019 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: Apache-2.0
 //
@@ -196,8 +196,8 @@ err:
 
 PyDoc_STRVAR(PNG__doc__,
 "ZopfliPNG(verbose=False, lossy_transparent=False, lossy_8bit=False,"
-" filter_strategies='', auto_filter_strategy=True, keep_chunks=None,"
-" use_zopfli=True, iterations=15, iterations_large=5)\n"
+" filter_strategies='', auto_filter_strategy=True, keep_color_type=False,"
+" keep_chunks=None, use_zopfli=True, iterations=15, iterations_large=5)\n"
 "\n"
 "Create a PNG optimizer which is using the ZopfliPNGOptimize()\n"
 "function for optimizing PNG files.\n"
@@ -210,6 +210,7 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
         "lossy_8bit",
         "filter_strategies",
         "auto_filter_strategy",
+        "keep_color_type",
         "keep_chunks",
         "use_zopfli",
         "iterations",
@@ -222,17 +223,19 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
     PyObject* lossy_8bit = Py_False;
     PyObject* filter_strategies = 0;
     PyObject* auto_filter_strategy = Py_True;
+    PyObject* keep_color_type = Py_False;
     PyObject* keep_chunks = 0;
     PyObject* use_zopfli = Py_True;
     clear(self->options);
     self->options = new ZopfliPNGOptions;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "|OOOOOOOii:ZopfliPNG", const_cast<char**>(kwlist),
+                                     "|OOOOOOOOii:ZopfliPNG", const_cast<char**>(kwlist),
                                      &verbose,
                                      &lossy_transparent,
                                      &lossy_8bit,
                                      &filter_strategies,
                                      &auto_filter_strategy,
+                                     &keep_color_type,
                                      &keep_chunks,
                                      &use_zopfli,
                                      &self->options->num_iterations,
@@ -253,6 +256,7 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
     PARSE_BOOL(self->options->lossy_transparent,    lossy_transparent);
     PARSE_BOOL(self->options->lossy_8bit,           lossy_8bit);
     PARSE_BOOL(self->options->auto_filter_strategy, auto_filter_strategy);
+    PARSE_BOOL(self->options->keep_colortype,       keep_color_type);
     PARSE_BOOL(self->options->use_zopfli,           use_zopfli);
 
 #undef PARSE_BOOL
@@ -375,6 +379,8 @@ static PyObject* PNG_get_bool(PNG* self, void* closure) {
         v = self->options->lossy_8bit;
     } else if (strcmp(s, "auto_filter_strategy") == 0) {
         v = self->options->auto_filter_strategy;
+    } else if (strcmp(s, "keep_color_type") == 0) {
+        v = self->options->keep_colortype;
     } else if (strcmp(s, "use_zopfli") == 0) {
         v = self->options->use_zopfli;
     }
@@ -410,6 +416,8 @@ static int PNG_set_bool(PNG* self, PyObject* value, void* closure) {
             self->options->filter_strategies.clear();
         }
         self->options->auto_filter_strategy = v;
+    } else if (strcmp(s, "keep_color_type") == 0) {
+        self->options->keep_colortype = v;
     } else if (strcmp(s, "use_zopfli") == 0) {
         self->options->use_zopfli = v;
     }
@@ -457,6 +465,7 @@ static PyGetSetDef PNG_getset[] = {
     GET_SET(lossy_transparent,    bool),
     GET_SET(lossy_8bit,           bool),
     GET_SET(auto_filter_strategy, bool),
+    GET_SET(keep_color_type,      bool),
     GET_SET(use_zopfli,           bool),
     GET_SET(iterations,           int),
     GET_SET(iterations_large,     int),
