@@ -1,7 +1,7 @@
 /*
  * _zopfli :: _zopflimodule.c
  *
- *   Copyright (c) 2015-2020 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
  *
  *   SPDX-License-Identifier: Apache-2.0
  */
@@ -149,11 +149,7 @@ Compressor_flush(Compressor *self) {
         PyErr_SetString(PyExc_ValueError, "repeated call to flush()");
         goto out;
     }
-#if PY_VERSION_HEX < 0x03020000
-    b = PyObject_CallMethod(self->data, "getvalue", NULL);
-#else
     b = PyObject_CallMethod(self->data, "getbuffer", NULL);
-#endif
     if (b == NULL) {
         goto out;
     }
@@ -436,12 +432,6 @@ PyTypeObject Deflater_Type = {
 };
 
 
-#if PY_MAJOR_VERSION < 3
-# define PyInit__zopfli   init_zopfli
-# define RETURN_MODULE(m) return
-#else
-# define RETURN_MODULE(m) return m
-
 static struct PyModuleDef _zopflimodule = {
     PyModuleDef_HEAD_INIT,
     MODULE,
@@ -449,18 +439,13 @@ static struct PyModuleDef _zopflimodule = {
     -1,
     NULL,
 };
-#endif
 
 
 PyMODINIT_FUNC
 PyInit__zopfli(void) {
     PyObject *m;
 
-#if PY_MAJOR_VERSION < 3
-    m = Py_InitModule(MODULE, NULL);
-#else
     m = PyModule_Create(&_zopflimodule);
-#endif
     if (m == NULL) {
         goto err;
     }
@@ -489,7 +474,7 @@ PyInit__zopfli(void) {
 
 #undef ADD_TYPE
 
-    RETURN_MODULE(m);
+    return m;
 err:
-    RETURN_MODULE(NULL);
+    return NULL;
 }

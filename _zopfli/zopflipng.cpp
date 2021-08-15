@@ -19,30 +19,15 @@ static inline void clear(T*& p) {
 }
 
 static inline PyObject* int_FromLong(long i) {
-#if PY_MAJOR_VERSION < 3
-    return PyInt_FromLong(i);
-#else
     return PyLong_FromLong(i);
-#endif
 }
 
 static inline PyObject* str_AsASCIIString(PyObject* u) {
-#if PY_MAJOR_VERSION < 3
-    if (!PyUnicode_Check(u)) {
-        Py_INCREF(u);
-        return u;
-    }
-#endif
     return PyUnicode_AsASCIIString(u);
 }
 
 static inline bool str_Check(PyObject* v) {
-#if PY_MAJOR_VERSION < 3
-    if (PyBytes_Check(v)
-        || PyUnicode_Check(v)) {
-#else
     if (PyUnicode_Check(v)) {
-#endif
         return true;
     }
     PyErr_Format(PyExc_TypeError, "expected str, got '%.200s'", Py_TYPE(v)->tp_name);
@@ -50,11 +35,7 @@ static inline bool str_Check(PyObject* v) {
 }
 
 static inline PyObject* str_FromString(const char* s) {
-#if PY_MAJOR_VERSION < 3
-    return PyBytes_FromString(s);
-#else
     return PyUnicode_FromString(s);
-#endif
 }
 
 
