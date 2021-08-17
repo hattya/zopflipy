@@ -6,8 +6,8 @@ A Python_ bindings for Zopfli_.
 .. image:: https://img.shields.io/pypi/v/zopflipy.svg
    :target: https://pypi.org/project/zopflipy
 
-.. image:: https://github.com/hattya/zopflipy/workflows/CI/badge.svg
-   :target: https://github.com/hattya/zopflipy/actions?query=workflow:CI
+.. image:: https://github.com/hattya/zopflipy/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/hattya/zopflipy/actions/workflows/ci.yml
 
 .. image:: https://semaphoreci.com/api/v1/hattya/zopflipy/branches/master/badge.svg
    :target: https://semaphoreci.com/hattya/zopflipy
