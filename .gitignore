@@ -1,9 +1,9 @@
+*.egg-info/
+.tox/
+build/
+dist/
 *.py?
 *.so
 *.sw?
 .coverage
 MANIFEST
-*.egg-info/
-.tox/
-build/
-dist/

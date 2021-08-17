@@ -150,10 +150,8 @@ Compressor_flush(Compressor *self) {
         goto out;
     }
     b = PyObject_CallMethod(self->data, "getbuffer", NULL);
-    if (b == NULL) {
-        goto out;
-    }
-    if (PyObject_GetBuffer(b, &in, PyBUF_CONTIG_RO) < 0) {
+    if (b == NULL
+        || PyObject_GetBuffer(b, &in, PyBUF_CONTIG_RO) < 0) {
         goto out;
     }
 
@@ -182,43 +180,43 @@ static PyMethodDef Compressor_methods[] = {
 
 PyTypeObject Compressor_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    MODULE ".ZopfliCompressor",               /* tp_name           */
-    sizeof(Compressor),                       /* tp_basicsize      */
-    0,                                        /* tp_itemsize       */
-    (destructor)Compressor_dealloc,           /* tp_dealloc        */
-    NULL,                                     /* tp_print          */
-    NULL,                                     /* tp_getattr        */
-    NULL,                                     /* tp_setattr        */
-    NULL,                                     /* tp_reserved       */
-    NULL,                                     /* tp_repr           */
-    NULL,                                     /* tp_as_number      */
-    NULL,                                     /* tp_as_sequence    */
-    NULL,                                     /* tp_as_mapping     */
-    NULL,                                     /* tp_hash           */
-    NULL,                                     /* tp_call           */
-    NULL,                                     /* tp_str            */
-    NULL,                                     /* tp_getattro       */
-    NULL,                                     /* tp_setattro       */
-    NULL,                                     /* tp_as_buffer      */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags          */
-    Compressor__doc__,                        /* tp_doc            */
-    NULL,                                     /* tp_traverse       */
-    NULL,                                     /* tp_clear          */
-    NULL,                                     /* tp_richcompare    */
-    0,                                        /* tp_weaklistoffset */
-    NULL,                                     /* tp_iter           */
-    NULL,                                     /* tp_iternext       */
-    Compressor_methods,                       /* tp_methods        */
-    NULL,                                     /* tp_members        */
-    NULL,                                     /* tp_getset         */
-    NULL,                                     /* tp_base           */
-    NULL,                                     /* tp_dict           */
-    NULL,                                     /* tp_descr_get      */
-    NULL,                                     /* tp_descr_set      */
-    0,                                        /* tp_dictoffset     */
-    (initproc)Compressor_init,                /* tp_init           */
-    NULL,                                     /* tp_alloc          */
-    PyType_GenericNew,                        /* tp_new            */
+    MODULE ".ZopfliCompressor",               /* tp_name              */
+    sizeof(Compressor),                       /* tp_basicsize         */
+    0,                                        /* tp_itemsize          */
+    (destructor)Compressor_dealloc,           /* tp_dealloc           */
+    0,                                        /* tp_vectorcall_offset */
+    NULL,                                     /* tp_getattr           */
+    NULL,                                     /* tp_setattr           */
+    NULL,                                     /* tp_reserved          */
+    NULL,                                     /* tp_repr              */
+    NULL,                                     /* tp_as_number         */
+    NULL,                                     /* tp_as_sequence       */
+    NULL,                                     /* tp_as_mapping        */
+    NULL,                                     /* tp_hash              */
+    NULL,                                     /* tp_call              */
+    NULL,                                     /* tp_str               */
+    NULL,                                     /* tp_getattro          */
+    NULL,                                     /* tp_setattro          */
+    NULL,                                     /* tp_as_buffer         */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags             */
+    Compressor__doc__,                        /* tp_doc               */
+    NULL,                                     /* tp_traverse          */
+    NULL,                                     /* tp_clear             */
+    NULL,                                     /* tp_richcompare       */
+    0,                                        /* tp_weaklistoffset    */
+    NULL,                                     /* tp_iter              */
+    NULL,                                     /* tp_iternext          */
+    Compressor_methods,                       /* tp_methods           */
+    NULL,                                     /* tp_members           */
+    NULL,                                     /* tp_getset            */
+    NULL,                                     /* tp_base              */
+    NULL,                                     /* tp_dict              */
+    NULL,                                     /* tp_descr_get         */
+    NULL,                                     /* tp_descr_set         */
+    0,                                        /* tp_dictoffset        */
+    (initproc)Compressor_init,                /* tp_init              */
+    NULL,                                     /* tp_alloc             */
+    PyType_GenericNew,                        /* tp_new               */
 };
 
 
@@ -392,43 +390,43 @@ static PyMethodDef Deflater_methods[] = {
 
 PyTypeObject Deflater_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    MODULE ".ZopfliDeflater",                 /* tp_name           */
-    sizeof(Deflater),                         /* tp_basicsize      */
-    0,                                        /* tp_itemsize       */
-    (destructor)Deflater_dealloc,             /* tp_dealloc        */
-    NULL,                                     /* tp_print          */
-    NULL,                                     /* tp_getattr        */
-    NULL,                                     /* tp_setattr        */
-    NULL,                                     /* tp_reserved       */
-    NULL,                                     /* tp_repr           */
-    NULL,                                     /* tp_as_number      */
-    NULL,                                     /* tp_as_sequence    */
-    NULL,                                     /* tp_as_mapping     */
-    NULL,                                     /* tp_hash           */
-    NULL,                                     /* tp_call           */
-    NULL,                                     /* tp_str            */
-    NULL,                                     /* tp_getattro       */
-    NULL,                                     /* tp_setattro       */
-    NULL,                                     /* tp_as_buffer      */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags          */
-    Deflater__doc__,                          /* tp_doc            */
-    NULL,                                     /* tp_traverse       */
-    NULL,                                     /* tp_clear          */
-    NULL,                                     /* tp_richcompare    */
-    0,                                        /* tp_weaklistoffset */
-    NULL,                                     /* tp_iter           */
-    NULL,                                     /* tp_iternext       */
-    Deflater_methods,                         /* tp_methods        */
-    NULL,                                     /* tp_members        */
-    NULL,                                     /* tp_getset         */
-    NULL,                                     /* tp_base           */
-    NULL,                                     /* tp_dict           */
-    NULL,                                     /* tp_descr_get      */
-    NULL,                                     /* tp_descr_set      */
-    0,                                        /* tp_dictoffset     */
-    (initproc)Deflater_init,                  /* tp_init           */
-    NULL,                                     /* tp_alloc          */
-    PyType_GenericNew,                        /* tp_new            */
+    MODULE ".ZopfliDeflater",                 /* tp_name              */
+    sizeof(Deflater),                         /* tp_basicsize         */
+    0,                                        /* tp_itemsize          */
+    (destructor)Deflater_dealloc,             /* tp_dealloc           */
+    0,                                        /* tp_vectorcall_offset */
+    NULL,                                     /* tp_getattr           */
+    NULL,                                     /* tp_setattr           */
+    NULL,                                     /* tp_reserved          */
+    NULL,                                     /* tp_repr              */
+    NULL,                                     /* tp_as_number         */
+    NULL,                                     /* tp_as_sequence       */
+    NULL,                                     /* tp_as_mapping        */
+    NULL,                                     /* tp_hash              */
+    NULL,                                     /* tp_call              */
+    NULL,                                     /* tp_str               */
+    NULL,                                     /* tp_getattro          */
+    NULL,                                     /* tp_setattro          */
+    NULL,                                     /* tp_as_buffer         */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags             */
+    Deflater__doc__,                          /* tp_doc               */
+    NULL,                                     /* tp_traverse          */
+    NULL,                                     /* tp_clear             */
+    NULL,                                     /* tp_richcompare       */
+    0,                                        /* tp_weaklistoffset    */
+    NULL,                                     /* tp_iter              */
+    NULL,                                     /* tp_iternext          */
+    Deflater_methods,                         /* tp_methods           */
+    NULL,                                     /* tp_members           */
+    NULL,                                     /* tp_getset            */
+    NULL,                                     /* tp_base              */
+    NULL,                                     /* tp_dict              */
+    NULL,                                     /* tp_descr_get         */
+    NULL,                                     /* tp_descr_set         */
+    0,                                        /* tp_dictoffset        */
+    (initproc)Deflater_init,                  /* tp_init              */
+    NULL,                                     /* tp_alloc             */
+    PyType_GenericNew,                        /* tp_new               */
 };
 
 
@@ -455,17 +453,16 @@ PyInit__zopfli(void) {
         goto err;
     }
 
-#define ADD_TYPE(m, tp)                                                 \
-    do {                                                                \
-        if (PyType_Ready(tp) < 0) {                                     \
-            goto err;                                                   \
-        }                                                               \
-        Py_INCREF(tp);                                                  \
-        if (PyModule_AddObject((m), strrchr((tp)->tp_name, '.') + 1,    \
-                               (PyObject *)(tp)) < 0) {                 \
-            Py_DECREF(tp);                                              \
-            goto err;                                                   \
-        }                                                               \
+#define ADD_TYPE(m, tp)                                                                         \
+    do {                                                                                        \
+        if (PyType_Ready(tp) < 0) {                                                             \
+            goto err;                                                                           \
+        }                                                                                       \
+        Py_INCREF(tp);                                                                          \
+        if (PyModule_AddObject((m), strrchr((tp)->tp_name, '.') + 1, (PyObject *)(tp)) < 0) {   \
+            Py_DECREF(tp);                                                                      \
+            goto err;                                                                           \
+        }                                                                                       \
     } while (0)
 
     ADD_TYPE(m, &Compressor_Type);

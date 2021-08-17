@@ -146,10 +146,8 @@ static int parse_keep_chunks(PNG* self, PyObject* keep_chunks) {
     self->options->keepchunks.clear();
     for (Py_ssize_t i = 0; i < n; ++i) {
         u = PySequence_GetItem(keep_chunks, i);
-        if (u == 0) {
-            goto err;
-        }
-        if (!str_Check(u)) {
+        if (u == 0
+            || !str_Check(u)) {
             goto err;
         }
         b = str_AsASCIIString(u);
@@ -436,8 +434,7 @@ static int PNG_set_int(PNG* self, PyObject* value, void* closure) {
     return 0;
 }
 
-#define GET_SET(v, tp) \
-    {const_cast<char*>(#v), reinterpret_cast<getter>(PNG_get_ ## tp), reinterpret_cast<setter>(PNG_set_ ## tp), 0, const_cast<char*>(#v)}
+#define GET_SET(v, tp) {const_cast<char*>(#v), reinterpret_cast<getter>(PNG_get_ ## tp), reinterpret_cast<setter>(PNG_set_ ## tp), 0, const_cast<char*>(#v)}
 
 static PyGetSetDef PNG_getset[] = {
     GET_SET(filter_strategies,    object),
@@ -457,42 +454,41 @@ static PyGetSetDef PNG_getset[] = {
 
 PyTypeObject PNG_Type = {
     PyVarObject_HEAD_INIT(0, 0)
-    MODULE ".ZopfliPNG",                          // tp_name
-    sizeof(PNG),                                  // tp_basicsize
-    0,                                            // tp_itemsize
-    reinterpret_cast<destructor>(PNG_dealloc),    // tp_dealloc
-    0,                                            // tp_print
-    0,                                            // tp_getattr
-    0,                                            // tp_setattr
-    0,                                            // tp_reserved
-    0,                                            // tp_repr
-    0,                                            // tp_as_number
-    0,                                            // tp_as_sequence
-    0,                                            // tp_as_mapping
-    0,                                            // tp_hash
-    0,                                            // tp_call
-    0,                                            // tp_str
-    0,                                            // tp_getattro
-    0,                                            // tp_setattro
-    0,                                            // tp_as_buffer
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
-        Py_TPFLAGS_HAVE_GC,                       // tp_flags
-    PNG__doc__,                                   // tp_doc
-    reinterpret_cast<traverseproc>(PNG_traverse), // tp_traverse
-    reinterpret_cast<inquiry>(PNG_clear),         // tp_clear
-    0,                                            // tp_richcompare
-    0,                                            // tp_weaklistoffset
-    0,                                            // tp_iter
-    0,                                            // tp_iternext
-    PNG_methods,                                  // tp_methods
-    0,                                            // tp_members
-    PNG_getset,                                   // tp_getset
-    0,                                            // tp_base
-    0,                                            // tp_dict
-    0,                                            // tp_descr_get
-    0,                                            // tp_descr_set
-    0,                                            // tp_dictoffset
-    reinterpret_cast<initproc>(PNG_init),         // tp_init
-    0,                                            // tp_alloc
-    PyType_GenericNew,                            // tp_new
+    MODULE ".ZopfliPNG",                                           // tp_name
+    sizeof(PNG),                                                   // tp_basicsize
+    0,                                                             // tp_itemsize
+    reinterpret_cast<destructor>(PNG_dealloc),                     // tp_dealloc
+    0,                                                             // tp_vectorcall_offset
+    0,                                                             // tp_getattr
+    0,                                                             // tp_setattr
+    0,                                                             // tp_reserved
+    0,                                                             // tp_repr
+    0,                                                             // tp_as_number
+    0,                                                             // tp_as_sequence
+    0,                                                             // tp_as_mapping
+    0,                                                             // tp_hash
+    0,                                                             // tp_call
+    0,                                                             // tp_str
+    0,                                                             // tp_getattro
+    0,                                                             // tp_setattro
+    0,                                                             // tp_as_buffer
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC, // tp_flags
+    PNG__doc__,                                                    // tp_doc
+    reinterpret_cast<traverseproc>(PNG_traverse),                  // tp_traverse
+    reinterpret_cast<inquiry>(PNG_clear),                          // tp_clear
+    0,                                                             // tp_richcompare
+    0,                                                             // tp_weaklistoffset
+    0,                                                             // tp_iter
+    0,                                                             // tp_iternext
+    PNG_methods,                                                   // tp_methods
+    0,                                                             // tp_members
+    PNG_getset,                                                    // tp_getset
+    0,                                                             // tp_base
+    0,                                                             // tp_dict
+    0,                                                             // tp_descr_get
+    0,                                                             // tp_descr_set
+    0,                                                             // tp_dictoffset
+    reinterpret_cast<initproc>(PNG_init),                          // tp_init
+    0,                                                             // tp_alloc
+    PyType_GenericNew,                                             // tp_new
 };
