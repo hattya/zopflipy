@@ -1,5 +1,5 @@
 /*
- * _zopfli :: _zopflimodule.c
+ * zopfli._zopfli :: _zopflimodule.c
  *
  *   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
  *

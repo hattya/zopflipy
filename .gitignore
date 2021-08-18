@@ -2,7 +2,7 @@
 .tox/
 build/
 dist/
-*.py?
+*.py[cd]
 *.so
 *.sw?
 .coverage

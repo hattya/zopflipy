@@ -1,7 +1,7 @@
 /*
- * _zopfli :: _zopflimodule.h
+ * zopfli._zopfli :: _zopflimodule.h
  *
- *   Copyright (c) 2015-2019 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
  *
  *   SPDX-License-Identifier: Apache-2.0
  */

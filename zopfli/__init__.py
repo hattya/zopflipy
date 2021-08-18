@@ -12,11 +12,13 @@ import codecs
 import os
 import struct
 import sys
+import threading
+from typing import cast, Any, AnyStr, IO, Optional, Tuple, Union
 import zipfile
 import zlib
 
-from _zopfli import (ZOPFLI_FORMAT_GZIP, ZOPFLI_FORMAT_ZLIB, ZOPFLI_FORMAT_DEFLATE,
-                     ZopfliCompressor, ZopfliDeflater, ZopfliPNG)
+from ._zopfli import (ZOPFLI_FORMAT_GZIP, ZOPFLI_FORMAT_ZLIB, ZOPFLI_FORMAT_DEFLATE,
+                      ZopfliCompressor, ZopfliDeflater, ZopfliPNG)
 
 
 __version__ = '1.6.dev'
@@ -24,10 +26,15 @@ __all__ = ['ZOPFLI_FORMAT_GZIP', 'ZOPFLI_FORMAT_ZLIB', 'ZOPFLI_FORMAT_DEFLATE',
            'ZopfliCompressor', 'ZopfliDeflater', 'ZopfliDecompressor', 'ZopfliPNG',
            'ZipFile', 'ZipInfo']
 
+if sys.version_info >= (3, 9):
+    P = Union[str, os.PathLike[str]]
+else:
+    P = Union[str, os.PathLike]
+
 
 class ZopfliDecompressor:
 
-    def __init__(self, format=ZOPFLI_FORMAT_DEFLATE):
+    def __init__(self, format: int = ZOPFLI_FORMAT_DEFLATE) -> None:
         if format == ZOPFLI_FORMAT_GZIP:
             wbits = zlib.MAX_WBITS + 16
         elif format == ZOPFLI_FORMAT_ZLIB:
@@ -39,35 +46,39 @@ class ZopfliDecompressor:
         self.__z = zlib.decompressobj(wbits)
 
     @property
-    def unused_data(self):
+    def unused_data(self) -> bytes:
         return self.__z.unused_data
 
     @property
-    def unconsumed_tail(self):
+    def unconsumed_tail(self) -> bytes:
         return self.__z.unconsumed_tail
 
     @property
-    def eof(self):
+    def eof(self) -> bool:
         return self.__z.eof
 
-    def decompress(self, *args, **kwargs):
-        return self.__z.decompress(*args, **kwargs)
+    def decompress(self, data: bytes, max_length: int = 0) -> bytes:
+        return self.__z.decompress(data, max_length)
 
-    def flush(self, *args, **kwargs):
-        return self.__z.flush(*args, **kwargs)
+    def flush(self, length: int = zlib.DEF_BUF_SIZE) -> bytes:
+        return self.__z.flush(length)
 
 
 class ZipFile(zipfile.ZipFile):
 
-    def __init__(self, file, mode='r', compression=zipfile.ZIP_DEFLATED,
-                 allowZip64=True, encoding='cp437', **kwargs):
+    fp: Any
+    compression: int
+    _lock: threading.RLock
+
+    def __init__(self, file: P, mode: str = 'r', compression: int = zipfile.ZIP_DEFLATED, allowZip64: bool = True,
+                 encoding: str = 'cp437', **kwargs: Any) -> None:
         self.encoding = encoding
         self._options = kwargs
         super(ZipFile, self).__init__(file, mode, compression, allowZip64)
         if sys.version_info >= (3, 8):
             self._strict_timestamps = kwargs.pop('strict_timestamps', True)
 
-    def _RealGetContents(self):
+    def _RealGetContents(self) -> None:
         super(ZipFile, self)._RealGetContents()
         for i, zi in enumerate(self.filelist):
             self.filelist[i] = zi = self._convert(zi)
@@ -79,20 +90,20 @@ class ZipFile(zipfile.ZipFile):
                 zi.filename = n
             self.NameToInfo[zi.filename] = zi
 
-    def write(self, filename, arcname=None, compress_type=None, **kwargs):
+    def write(self, filename: P, arcname: Optional[P] = None, compress_type: Optional[int] = None, **kwargs: Any) -> None:
         class ZopfliFile:
-            def __init__(self, zf, z):
+            def __init__(self, zf: ZipFile, z: Optional[ZopfliCompressor]) -> None:
                 self.size = 0
                 self.pos = 0
-                self._fp = zf.fp
+                self._fp = cast(IO[bytes], zf.fp)
                 self._rewrite = zf._rewrite
                 self._w = 0
                 self._z = z
 
-            def __getattr__(self, name):
+            def __getattr__(self, name: str) -> Any:
                 return getattr(self._fp, name)
 
-            def seek(self, offset, whence=os.SEEK_SET):
+            def seek(self, offset: int, whence: int = os.SEEK_SET) -> int:
                 if (self._w > 0
                     and self._z):
                     data = self._z.flush()
@@ -103,7 +114,7 @@ class ZipFile(zipfile.ZipFile):
                 self._w = -self._w
                 return self._fp.seek(offset, whence)
 
-            def write(self, data):
+            def write(self, data: bytes) -> None:
                 if self._w == 0:
                     self._fp.write(self._rewrite(data))
                 elif self._w > 0:
@@ -114,13 +125,12 @@ class ZipFile(zipfile.ZipFile):
                 self._w += 1
 
         zopflify = self._zopflify(compress_type)
+        z: Optional[ZopfliCompressor] = None
         if zopflify:
             compress_type = zipfile.ZIP_STORED
             opts = self._options.copy()
             opts.update(kwargs)
             z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
-        else:
-            z = None
         self._lock.acquire()
         try:
             fp = self.fp
@@ -144,19 +154,19 @@ class ZipFile(zipfile.ZipFile):
         finally:
             self._lock.release()
 
-    def writestr(self, zinfo_or_arcname, data, compress_type=None, **kwargs):
+    def writestr(self, zinfo_or_arcname: Union[str, zipfile.ZipInfo], data: AnyStr, compress_type: Optional[int] = None, **kwargs: Any) -> None:
         class ZopfliFile:
-            def __init__(self, zf, z, rw):
+            def __init__(self, zf: ZipFile, z: Optional[ZopfliCompressor], rw: bool) -> None:
                 self.size = 0
                 self._fp = zf.fp
                 self._rewrite = zf._rewrite if rw else None
                 self._w = 0
                 self._z = z
 
-            def __getattr__(self, name):
+            def __getattr__(self, name: str) -> Any:
                 return getattr(self._fp, name)
 
-            def write(self, data):
+            def write(self, data: bytes) -> None:
                 if self._w == 0:
                     self._fp.write(self._rewrite(data) if self._rewrite else data)
                 elif self._w == 1:
@@ -173,13 +183,12 @@ class ZipFile(zipfile.ZipFile):
                 zinfo_or_arcname.encoding = self.encoding
                 rw = False
         zopflify = self._zopflify(compress_type)
+        z: Optional[ZopfliCompressor] = None
         if zopflify:
             compress_type = zipfile.ZIP_STORED
             opts = self._options.copy()
             opts.update(kwargs)
             z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
-        else:
-            z = None
         self._lock.acquire()
         try:
             fp = self.fp
@@ -201,7 +210,7 @@ class ZipFile(zipfile.ZipFile):
         finally:
             self._lock.release()
 
-    def _convert(self, src):
+    def _convert(self, src: zipfile.ZipInfo) -> 'ZipInfo':
         if isinstance(src, ZipInfo):
             dst = src
         else:
@@ -214,16 +223,16 @@ class ZipFile(zipfile.ZipFile):
         dst.encoding = self.encoding
         return dst
 
-    def _rewrite(self, fh):
+    def _rewrite(self, fh: bytes) -> bytes:
         n = struct.unpack('<H', fh[26:28])[0]
         name = fh[30:30+n].decode('utf-8').encode(self.encoding)
         return fh[:30] + name + fh[30+n:]
 
-    def _zip64(self, zi):
+    def _zip64(self, zi: zipfile.ZipInfo) -> bool:
         return (zi.file_size > zipfile.ZIP64_LIMIT
                 or zi.compress_size > zipfile.ZIP64_LIMIT)
 
-    def _zopflify(self, compression):
+    def _zopflify(self, compression: Optional[int]) -> bool:
         return (compression == zipfile.ZIP_DEFLATED
                 or (compression is None
                     and self.compression == zipfile.ZIP_DEFLATED))
@@ -233,11 +242,14 @@ class ZipInfo(zipfile.ZipInfo):
 
     __slots__ = ('encoding',)
 
-    def __init__(self, *args, **kwargs):
+    encoding: Optional[str]
+    orig_filename: str
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ZipInfo, self).__init__(*args, **kwargs)
         self.encoding = None
 
-    def _encodeFilenameFlags(self):
+    def _encodeFilenameFlags(self) -> Tuple[bytes, int]:
         if isinstance(self.filename, bytes):
             return self.filename, self.flag_bits
         encoding = codecs.lookup(self.encoding).name if self.encoding else 'ascii'

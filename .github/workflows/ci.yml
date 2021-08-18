@@ -65,7 +65,7 @@ jobs:
         if: matrix.platform != 'Windows'
         run: |
           lcov -c -d . -o lcov.info --no-external
-          lcov -r lcov.info "*/zopfli/*" -o lcov.info
+          lcov -r lcov.info "*/_zopfli/zopfli/*" -o lcov.info
           rm -rf build
       - name: Generate XML coverage report
         run: coverage xml

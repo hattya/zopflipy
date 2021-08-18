@@ -12,10 +12,10 @@ except ImportError:
     from distutils.core import setup, Command, Extension
 
 
-zopfli_dir = os.path.join('_zopfli', 'zopfli', 'src')
+zopfli_dir = os.path.join('zopfli', '_zopfli', 'zopfli', 'src')
 version = 'unknown'
 try:
-    with open('zopfli.py') as fp:
+    with open(os.path.join('zopfli', '__init__.py')) as fp:
         for l in fp:
             if l.startswith('__version__ = '):
                 version = l.split('=', 1)[1].strip("\n '")
@@ -43,7 +43,7 @@ class test(Command):
     boolean_options = ['failfast']
 
     def initialize_options(self):
-        self.failfast = 0
+        self.failfast = False
 
     def finalize_options(self):
         pass
@@ -54,13 +54,13 @@ class test(Command):
         build_ext = self.reinitialize_command('build_ext')
         build_ext.inplace = True
         self.run_command('build_ext')
-        # run unittest
-        argv = [sys.argv[0]]
+        # run unittest discover
+        argv = [sys.argv[0], 'discover', '--start-directory', 'tests']
         if self.verbose:
             argv.append('--verbose')
         if self.failfast:
             argv.append('--failfast')
-        unittest.main('test_zopfli', argv=argv)
+        unittest.main(None, argv=argv)
 
 
 try:
@@ -69,8 +69,11 @@ try:
 except OSError:
     long_description = ''
 
-py_modules = ['zopfli']
-ext_modules = [Extension('_zopfli',
+packages = ['zopfli']
+package_data = {
+    'zopfli': ['py.typed', '*.pyi'],
+}
+ext_modules = [Extension('zopfli._zopfli',
                          include_dirs=[zopfli_dir],
                          sources=list_sources('.', ['.c', '.cc', '.cpp']))]
 
@@ -86,7 +89,8 @@ setup(name='zopflipy',
       author_email='hattya@gmail.com',
       url='https://github.com/hattya/zopflipy',
       license='ALv2',
-      py_modules=py_modules,
+      packages=packages,
+      package_data=package_data,
       ext_modules=ext_modules,
       classifiers=[
           'Development Status :: 5 - Production/Stable',

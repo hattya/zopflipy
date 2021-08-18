@@ -6,6 +6,7 @@ Version 1.6
 
 * Add ``keep_color_type`` attribute to the ``ZopfliPNG`` class.
 * Drop Python 2.7 support.
+* Add type annotations.
 
 
 Version 1.5

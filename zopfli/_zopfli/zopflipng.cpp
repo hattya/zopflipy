@@ -1,5 +1,5 @@
 //
-// _zopfli :: zopflipng.cpp
+// zopfli._zopfli :: zopflipng.cpp
 //
 //   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
 //
