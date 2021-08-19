@@ -1,9 +1,12 @@
 *.egg-info/
+.eggs/
 .tox/
 build/
 dist/
+*.egg
 *.py[cd]
 *.so
 *.sw?
 .coverage
 MANIFEST
+zopfli/__version__.py

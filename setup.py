@@ -6,21 +6,10 @@
 import os
 import sys
 
-try:
-    from setuptools import setup, Command, Extension
-except ImportError:
-    from distutils.core import setup, Command, Extension
+from setuptools import setup, Command, Extension
 
 
 zopfli_dir = os.path.join('zopfli', '_zopfli', 'zopfli', 'src')
-version = 'unknown'
-try:
-    with open(os.path.join('zopfli', '__init__.py')) as fp:
-        for l in fp:
-            if l.startswith('__version__ = '):
-                version = l.split('=', 1)[1].strip("\n '")
-except OSError:
-    pass
 
 
 def list_sources(path, exts):
@@ -82,7 +71,6 @@ cmdclass = {
 }
 
 setup(name='zopflipy',
-      version=version,
       description='A Python bindings for Zopfli',
       long_description=long_description,
       author='Akinori Hattori',
@@ -92,6 +80,13 @@ setup(name='zopflipy',
       packages=packages,
       package_data=package_data,
       ext_modules=ext_modules,
+      setup_requires=['scmver'],
+      scmver={
+          'root': os.path.dirname(os.path.abspath(__file__)),
+          'spec': 'micro',
+          'write_to': os.path.join('zopfli', '__version__.py'),
+          'fallback': ['__version__:version', 'zopfli'],
+      },
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Intended Audience :: Developers',
