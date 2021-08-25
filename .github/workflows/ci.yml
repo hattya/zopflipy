@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          pip install -U coverage tox tox-venv
+          pip install -U coverage tox
       - name: Install LCOV on Linux
         if: matrix.platform == 'Linux'
         run: sudo apt install lcov
