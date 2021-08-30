@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.6
 -----------
 
+Release date: 2021-08-30
+
 * Add ``keep_color_type`` attribute to the ``ZopfliPNG`` class.
 * Drop Python 2.7 support.
 * Add type annotations.
