@@ -78,12 +78,12 @@ class ZipFile(zipfile.ZipFile):
                  encoding: str = 'cp437', **kwargs: Any) -> None:
         self.encoding = encoding
         self._options = kwargs
-        super(ZipFile, self).__init__(file, mode, compression, allowZip64)
+        super().__init__(file, mode, compression, allowZip64)
         if sys.version_info >= (3, 8):
             self._strict_timestamps = kwargs.pop('strict_timestamps', True)
 
     def _RealGetContents(self) -> None:
-        super(ZipFile, self)._RealGetContents()
+        super()._RealGetContents()
         for i, zi in enumerate(self.filelist):
             self.filelist[i] = zi = self._convert(zi)
             if not zi.flag_bits & 0x800:
@@ -140,7 +140,7 @@ class ZipFile(zipfile.ZipFile):
             fp = self.fp
             try:
                 self.fp = ZopfliFile(self, z)
-                super(ZipFile, self).write(filename, arcname, compress_type)
+                super().write(filename, arcname, compress_type)
                 zi = self._convert(self.filelist[-1])
                 if zopflify:
                     zi.compress_size = self.fp.size
@@ -198,7 +198,7 @@ class ZipFile(zipfile.ZipFile):
             fp = self.fp
             try:
                 self.fp = ZopfliFile(self, z, rw)
-                super(ZipFile, self).writestr(zinfo_or_arcname, data, compress_type)
+                super().writestr(zinfo_or_arcname, data, compress_type)
                 zi = self._convert(self.filelist[-1])
                 if zopflify:
                     zi.compress_type = zipfile.ZIP_DEFLATED
@@ -250,7 +250,7 @@ class ZipInfo(zipfile.ZipInfo):
     orig_filename: str
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(ZipInfo, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.encoding = None
 
     def _encodeFilenameFlags(self) -> Tuple[bytes, int]:

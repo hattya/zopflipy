@@ -7,7 +7,6 @@
 #
 
 import os
-import shutil
 import tempfile
 import time
 import unittest
@@ -276,12 +275,11 @@ class ZopfliPNGTestCase(unittest.TestCase):
 class ZipFileTest(unittest.TestCase):
 
     def setUp(self):
-        super(ZipFileTest, self).setUp()
-        self.path = tempfile.mkdtemp(prefix='zopfli-')
+        self._dir = tempfile.TemporaryDirectory(prefix='zopfli-')
+        self.path = self._dir.name
 
     def tearDown(self):
-        super(ZipFileTest, self).tearDown()
-        shutil.rmtree(self.path)
+        self._dir.cleanup()
 
     def test_ascii(self):
         names = {
@@ -344,8 +342,10 @@ class ZipFileTest(unittest.TestCase):
             writestr(zf, f('{spam}.txt'))
             writestr(zf, f('{eggs}.txt'), f('{eggs}.txt').encode(encoding))
         with zopfli.ZipFile(path, 'r', encoding=encoding) as zf:
-            for n, flag_bits in (('{spam}.txt', 0x800),
-                                 ('{eggs}.txt', 0)):
+            for n, flag_bits in (
+                ('{spam}.txt', 0x800),
+                ('{eggs}.txt', 0),
+            ):
                 name = f(n)
                 raw_name = name.encode('utf-8' if flag_bits else encoding).decode('utf-8' if flag_bits else 'cp437')
                 zi = zf.getinfo(name)
@@ -371,7 +371,7 @@ class ZipFileTest(unittest.TestCase):
                 name.compress_type = compress_type
             zf.writestr(name, data, compress_type)
 
-        path = os.path.join(self.path, '{}.zip'.format(encoding))
+        path = os.path.join(self.path, f'{encoding}.zip')
         folder = '{New Folder}'
         os.mkdir(f(os.path.join(self.path, folder)))
         with zopfli.ZipFile(path, 'w', encoding=encoding) as zf:
@@ -385,15 +385,17 @@ class ZipFileTest(unittest.TestCase):
             writestr(zf, f(os.path.join(folder, '{sausage}.txt')), deflate=False, zinfo=True)
             write(zf, f(os.path.join(folder, '{tomato}.txt')), deflate=False)
         with zopfli.ZipFile(path, 'r', encoding=encoding) as zf:
-            for n, compress_type in (('{New Folder}/', zipfile.ZIP_STORED),
-                                     ('{New Folder}/{spam}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{New Folder}/{eggs}.txt', zipfile.ZIP_STORED),
-                                     ('{New Folder}/{ham}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{New Folder}/{toast}.txt', zipfile.ZIP_STORED),
-                                     ('{New Folder}/{beans}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{New Folder}/{bacon}.txt', zipfile.ZIP_DEFLATED),
-                                     ('{New Folder}/{sausage}.txt', zipfile.ZIP_STORED),
-                                     ('{New Folder}/{tomato}.txt', zipfile.ZIP_STORED)):
+            for n, compress_type in (
+                ('{New Folder}/', zipfile.ZIP_STORED),
+                ('{New Folder}/{spam}.txt', zipfile.ZIP_DEFLATED),
+                ('{New Folder}/{eggs}.txt', zipfile.ZIP_STORED),
+                ('{New Folder}/{ham}.txt', zipfile.ZIP_DEFLATED),
+                ('{New Folder}/{toast}.txt', zipfile.ZIP_STORED),
+                ('{New Folder}/{beans}.txt', zipfile.ZIP_DEFLATED),
+                ('{New Folder}/{bacon}.txt', zipfile.ZIP_DEFLATED),
+                ('{New Folder}/{sausage}.txt', zipfile.ZIP_STORED),
+                ('{New Folder}/{tomato}.txt', zipfile.ZIP_STORED),
+            ):
                 name = f(n)
                 raw_name = name.encode(encoding).decode('utf-8' if encoding == 'utf-8' else 'cp437')
                 zi = zf.getinfo(name)
