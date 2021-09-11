@@ -80,13 +80,6 @@ setup(name='zopflipy',
       packages=packages,
       package_data=package_data,
       ext_modules=ext_modules,
-      setup_requires=['scmver'],
-      scmver={
-          'root': os.path.dirname(os.path.abspath(__file__)),
-          'spec': 'micro',
-          'write_to': os.path.join('zopfli', '__version__.py'),
-          'fallback': ['__version__:version', 'zopfli'],
-      },
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Intended Audience :: Developers',
@@ -102,4 +95,12 @@ setup(name='zopflipy',
           'Topic :: Software Development :: Libraries :: Python Modules',
           'Topic :: System :: Archiving :: Compression',
       ],
-      cmdclass=cmdclass)
+      python_requires='>= 3.6',
+      cmdclass=cmdclass,
+      setup_requires=['scmver'],
+      scmver={
+          'root': os.path.dirname(os.path.abspath(__file__)),
+          'spec': 'micro',
+          'write_to': os.path.join('zopfli', '__version__.py'),
+          'fallback': ['__version__:version', 'zopfli'],
+      })
