@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.7
+-----------
+
+* Support Python 3.10.
+
+
 Version 1.6
 -----------
 
