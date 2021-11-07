@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.7
 -----------
 
+Release date: 2021-11-07
+
 * Support Python 3.10.
 
 
