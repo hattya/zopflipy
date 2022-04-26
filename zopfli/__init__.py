@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2022 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -14,6 +14,10 @@ import struct
 import sys
 import threading
 from typing import cast, Any, AnyStr, IO, Optional, Tuple, Union
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 import zipfile
 import zlib
 
@@ -74,7 +78,7 @@ class ZipFile(zipfile.ZipFile):
     compression: int
     _lock: threading.RLock
 
-    def __init__(self, file: P, mode: str = 'r', compression: int = zipfile.ZIP_DEFLATED, allowZip64: bool = True,
+    def __init__(self, file: P, mode: Literal['r', 'w', 'x', 'a'] = 'r', compression: int = zipfile.ZIP_DEFLATED, allowZip64: bool = True,
                  encoding: str = 'cp437', **kwargs: Any) -> None:
         self.encoding = encoding
         self._options = kwargs
