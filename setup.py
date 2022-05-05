@@ -52,16 +52,6 @@ class test(Command):
         unittest.main(None, argv=argv)
 
 
-try:
-    with open('README.rst') as fp:
-        long_description = fp.read()
-except OSError:
-    long_description = ''
-
-packages = ['zopfli']
-package_data = {
-    'zopfli': ['py.typed', '*.pyi'],
-}
 ext_modules = [Extension('zopfli._zopfli',
                          include_dirs=[zopfli_dir],
                          sources=list_sources('.', ['.c', '.cc', '.cpp']))]
@@ -70,34 +60,8 @@ cmdclass = {
     'test': test,
 }
 
-setup(name='zopflipy',
-      description='A Python bindings for Zopfli',
-      long_description=long_description,
-      author='Akinori Hattori',
-      author_email='hattya@gmail.com',
-      url='https://github.com/hattya/zopflipy',
-      license='ALv2',
-      packages=packages,
-      package_data=package_data,
-      ext_modules=ext_modules,
-      classifiers=[
-          'Development Status :: 5 - Production/Stable',
-          'Intended Audience :: Developers',
-          'License :: OSI Approved :: Apache Software License',
-          'Operating System :: OS Independent',
-          'Programming Language :: C',
-          'Programming Language :: C++',
-          'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.7',
-          'Programming Language :: Python :: 3.8',
-          'Programming Language :: Python :: 3.9',
-          'Programming Language :: Python :: 3.10',
-          'Topic :: Software Development :: Libraries :: Python Modules',
-          'Topic :: System :: Archiving :: Compression',
-      ],
-      python_requires='>= 3.7',
+setup(ext_modules=ext_modules,
       cmdclass=cmdclass,
-      setup_requires=['scmver'],
       scmver={
           'root': os.path.dirname(os.path.abspath(__file__)),
           'spec': 'micro',

@@ -2,5 +2,6 @@ include CHANGES.rst
 include LICENSE.txt
 include MANIFEST.in
 include README.rst
+include pyproject.toml
 recursive-include tests *.py
 recursive-include zopfli/_zopfli *.h CONTRIBUTORS COPYING README*
