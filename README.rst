@@ -79,6 +79,27 @@ ZopfliPNG
    True
 
 
+ZipFile
+~~~~~~~
+
+A subclass of |zipfile.ZipFile|_ which uses |ZopfliCompressor|_ for the
+|zipfile.ZIP_DEFLATED|_ compression method.
+
+.. code:: pycon
+
+   >>> import zipfile
+   >>> import zopfli
+   >>> with zopfli.ZipFile('a.zip', 'w', zipfile.ZIP_DEFLATED) as zf:
+   ...     zf.writestr('a.txt', b'Hello, world!')
+
+
+.. |zipfile.ZipFile| replace:: ``zipfile.ZipFile``
+.. _zipfile.ZipFile: https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile
+.. |ZopfliCompressor| replace:: ``ZopfliCompressor``
+.. |zipfile.ZIP_DEFLATED| replace:: ``zipfile.ZIP_DEFLATED``
+.. _zipfile.ZIP_DEFLATED: https://docs.python.org/3/library/zipfile.html#zipfile.ZIP_DEFLATED
+
+
 License
 -------
 
