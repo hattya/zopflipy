@@ -1,0 +1,36 @@
+name: Build
+on:
+  - push
+  - pull_request
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform:
+          - Linux
+          - macOS
+          - Windows
+        include:
+          - platform: Linux
+            os: ubuntu-latest
+          - platform: macOS
+            os: macos-latest
+          - platform: Windows
+            os: windows-latest
+    name: Build on ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build
+        uses: pypa/cibuildwheel@v2.10.0
+        env:
+          CIBW_SKIP: pp* *musllinux*
+          CIBW_ARCHS_MACOS: x86_64 universal2
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: wheelhouse
