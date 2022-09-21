@@ -23,6 +23,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          fetch-depth: 0
           submodules: recursive
       - name: Build
         uses: pypa/cibuildwheel@v2.10.0
