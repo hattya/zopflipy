@@ -98,6 +98,17 @@ class ZipFile(zipfile.ZipFile):
                 zi.filename = n
             self.NameToInfo[zi.filename] = zi
 
+    def open(self, name: Union[str, zipfile.ZipInfo], mode: Literal['r', 'w'] = 'r', pwd: Optional[bytes] = None,
+             *, force_zip64: bool = False, **kwargs: Any) -> IO[bytes]:
+        fp = super().open(name, mode, pwd, force_zip64=force_zip64)
+        if (mode == 'w'
+            and self._zopflify(None)
+            and fp._compressor):
+            opts = self._options.copy()
+            opts.update(kwargs)
+            fp._compressor = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
+        return fp
+
     def _open_to_write(self, zinfo: zipfile.ZipInfo, force_zip64: bool = False) -> IO[bytes]:
         return cast(IO[bytes], super()._open_to_write(self._convert(zinfo), force_zip64))
 

@@ -368,6 +368,10 @@ class ZipFileTest(unittest.TestCase):
     def _test_zip(self, encoding, names):
         f = self._f(names)
 
+        def openw(zf, name):
+            with zf.open(name, 'w') as fp:
+                fp.write(os.path.splitext(os.path.basename(name))[0].encode(encoding))
+
         def write(zf, name, deflate=True):
             p = os.path.join(self.path, name)
             with open(p, 'w', encoding=encoding) as fp:
@@ -393,7 +397,7 @@ class ZipFileTest(unittest.TestCase):
             write(zf, f(os.path.join(folder, '{eggs}.txt')), deflate=False)
             writestr(zf, f(os.path.join(folder, '{ham}.txt')))
             writestr(zf, f(os.path.join(folder, '{toast}.txt')), deflate=False)
-            write(zf, f(os.path.join(folder, '{beans}.txt')))
+            openw(zf, f(os.path.join(folder, '{beans}.txt')))
             writestr(zf, f(os.path.join(folder, '{bacon}.txt')), zinfo=True)
             writestr(zf, f(os.path.join(folder, '{sausage}.txt')), deflate=False, zinfo=True)
             write(zf, f(os.path.join(folder, '{tomato}.txt')), deflate=False)

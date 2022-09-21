@@ -5,7 +5,7 @@ Version 1.8
 -----------
 
 * Drop Python 3.6 support.
-* Improve compatiblity of ``ZipFile`` with ``zipfile.ZipFile``.
+* Improve compatibility of ``ZipFile`` with ``zipfile.ZipFile``.
 
 
 Version 1.7
