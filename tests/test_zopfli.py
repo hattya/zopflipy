@@ -7,6 +7,7 @@
 #
 
 import os
+import sys
 import tempfile
 import time
 import unittest
@@ -392,7 +393,10 @@ class ZipFileTest(unittest.TestCase):
         os.mkdir(f(os.path.join(self.path, folder)))
         os.utime(f(os.path.join(self.path, folder)), (self.time,) * 2)
         with zopfli.ZipFile(path, 'w', encoding=encoding) as zf:
-            zf.write(f(os.path.join(self.path, folder)), f(folder))
+            if sys.version_info >= (3, 11):
+                zf.mkdir(f(folder))
+            else:
+                zf.write(f(os.path.join(self.path, folder)), f(folder))
             write(zf, f(os.path.join(folder, '{spam}.txt')))
             write(zf, f(os.path.join(folder, '{eggs}.txt')), deflate=False)
             writestr(zf, f(os.path.join(folder, '{ham}.txt')))
