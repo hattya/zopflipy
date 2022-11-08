@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.8
 -----------
 
+Release date: 2022-11-08
+
 * Drop Python 3.6 support.
 * Improve compatibility of ``ZipFile`` with ``zipfile.ZipFile``.
 * Support Python 3.11.
