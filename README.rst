@@ -9,9 +9,6 @@ A Python_ bindings for Zopfli_.
 .. image:: https://github.com/hattya/zopflipy/actions/workflows/ci.yml/badge.svg
    :target: https://github.com/hattya/zopflipy/actions/workflows/ci.yml
 
-.. image:: https://semaphoreci.com/api/v1/hattya/zopflipy/branches/master/badge.svg
-   :target: https://semaphoreci.com/hattya/zopflipy
-
 .. image:: https://ci.appveyor.com/api/projects/status/98a7e7d6qlkvs6vl/branch/master?svg=true
    :target: https://ci.appveyor.com/project/hattya/zopflipy
 
