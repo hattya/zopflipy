@@ -21,12 +21,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Build
-        uses: pypa/cibuildwheel@v2.11.2
+        uses: pypa/cibuildwheel@v2.16.0
         env:
           CIBW_SKIP: pp* *musllinux*
           CIBW_ARCHS_MACOS: x86_64 universal2
