@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2022 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2023 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -13,11 +13,7 @@ import os
 import struct
 import sys
 import threading
-from typing import cast, Any, AnyStr, IO, Optional, Tuple, Union
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from typing import cast, Any, AnyStr, IO, Literal, Optional, Tuple, Union
 import zipfile
 import zlib
 
@@ -83,8 +79,7 @@ class ZipFile(zipfile.ZipFile):
         self.encoding = encoding
         self._options = kwargs
         super().__init__(file, mode, compression, allowZip64, compresslevel)
-        if sys.version_info >= (3, 8):
-            self._strict_timestamps = strict_timestamps
+        self._strict_timestamps = strict_timestamps
 
     def _RealGetContents(self) -> None:
         super()._RealGetContents()
