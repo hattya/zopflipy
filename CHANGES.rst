@@ -5,6 +5,7 @@ Version 1.9
 -----------
 
 * Drop Python 3.7 support.
+* Support Python 3.12.
 
 
 Version 1.8
