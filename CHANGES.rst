@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.10
+------------
+
+* Improve type annotations.
+
+
 Version 1.9
 -----------
 

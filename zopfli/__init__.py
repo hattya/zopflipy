@@ -13,7 +13,7 @@ import os
 import struct
 import sys
 import threading
-from typing import cast, Any, AnyStr, IO, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, cast, Any, AnyStr, IO, Literal, Optional, Tuple, Union
 import zipfile
 import zlib
 
@@ -30,7 +30,8 @@ try:
 except ImportError:
     __version__ = 'unknown'
 
-if sys.version_info >= (3, 9):
+if (TYPE_CHECKING
+    or sys.version_info >= (3, 9)):
     P = Union[str, os.PathLike[str]]
 else:
     P = Union[str, os.PathLike]
