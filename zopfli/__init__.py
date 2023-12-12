@@ -8,6 +8,7 @@
 
 """Zopfli Compression Algorithm"""
 
+from __future__ import annotations
 import codecs
 import os
 import struct
@@ -180,7 +181,7 @@ class ZipFile(zipfile.ZipFile):
                 self.filelist[-1] = zi
                 self.NameToInfo[zi.filename] = zi
 
-    def _convert(self, src: zipfile.ZipInfo) -> 'ZipInfo':
+    def _convert(self, src: zipfile.ZipInfo) -> ZipInfo:
         if isinstance(src, ZipInfo):
             dst = src
         else:
