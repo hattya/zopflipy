@@ -1,6 +1,65 @@
 [build-system]
 requires = [
-    "setuptools >= 42",
+    "setuptools >= 61.0",
     "scmver",
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "zopflipy"
+description = "A Python bindings for Zopfli"
+readme = "README.rst"
+authors = [
+    {name = "Akinori Hattori", email = "hattya@gmail.com"},
+]
+license = {"text" = "ALv2"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: C",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Archiving :: Compression",
+]
+requires-python = ">= 3.8"
+dynamic = [
+    "version",
+]
+
+[project.urls]
+Homepage = "https://github.com/hattya/zopflipy"
+
+[tool.setuptools]
+include-package-data = false
+packages = ["zopfli"]
+
+[tool.setuptools.package-data]
+zopfli = [
+    "py.typed",
+    "*.pyi",
+]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+partial_branches = [
+    "pragma: no partial",
+    "if sys.version_info",
+]
+
+[tool.mypy]
+disable_error_code = [
+    "attr-defined",
+    "misc",
+    "override",
+]
+strict = true
