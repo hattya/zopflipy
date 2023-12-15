@@ -31,7 +31,7 @@ jobs:
           CIBW_SKIP: pp* *musllinux*
           CIBW_ARCHS_MACOS: x86_64 universal2
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-${{ matrix.platform }}
           path: wheelhouse
