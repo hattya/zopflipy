@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       - name: Build
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.16.3
         env:
           CIBW_SKIP: pp* *musllinux*
           CIBW_ARCHS_MACOS: x86_64 universal2
@@ -35,3 +35,13 @@ jobs:
         with:
           name: dist-${{ matrix.platform }}
           path: wheelhouse
+  merge:
+    name: Merge artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: dist
+          delete-merged: true
