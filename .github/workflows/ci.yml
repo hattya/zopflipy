@@ -70,10 +70,12 @@ jobs:
       - name: Generate XML coverage report
         run: coverage xml
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          flags: ${{ matrix.platform }}
+          token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: PYTHON_VERSION,ARCH
+          fail_ci_if_error: true
+          flags: ${{ matrix.platform }}
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
           ARCH: ${{ matrix.architecture }}
