@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.10
 ------------
 
+Release date: 2024-02-04
+
 * Improve type annotations.
 
 
