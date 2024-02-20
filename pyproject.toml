@@ -12,7 +12,7 @@ readme = "README.rst"
 authors = [
     {name = "Akinori Hattori", email = "hattya@gmail.com"},
 ]
-license = {"text" = "ALv2"}
+license = {text = "ALv2"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -39,7 +39,9 @@ Homepage = "https://github.com/hattya/zopflipy"
 
 [tool.setuptools]
 include-package-data = false
-packages = ["zopfli"]
+packages = [
+    "zopfli",
+]
 
 [tool.setuptools.package-data]
 zopfli = [

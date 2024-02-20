@@ -1,10 +1,8 @@
 *.egg-info/
-.eggs/
 .tox/
 build/
 dist/
-*.egg
-*.py[cd]
+*.py?
 *.so
 *.sw?
 .coverage
