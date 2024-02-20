@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools >= 61.0",
-    "scmver",
+    "scmver[toml] >= 1.7",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -48,6 +48,11 @@ zopfli = [
     "py.typed",
     "*.pyi",
 ]
+
+[tool.scmver]
+spec = "micro"
+write-to = "zopfli/__version__.py"
+fallback = {attr = "__version__:version", path = "zopfli"}
 
 [tool.coverage.run]
 branch = true

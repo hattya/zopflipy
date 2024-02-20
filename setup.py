@@ -54,10 +54,4 @@ setup(
     cmdclass={
         'test': test,
     },
-    scmver={
-        'root': os.path.dirname(os.path.abspath(__file__)),
-        'spec': 'micro',
-        'write_to': os.path.join('zopfli', '__version__.py'),
-        'fallback': ['__version__:version', 'zopfli'],
-    },
 )
