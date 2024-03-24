@@ -4,6 +4,8 @@ on:
   pull_request:
   schedule:
     - cron: '0 6 * * 3'
+permissions:
+  security-events: write
 jobs:
   analyze:
     strategy:
@@ -25,7 +27,7 @@ jobs:
           python-version: 3.x
       - name: Install dependencies
         run: |
-          python -m pip install -U pip setuptools
+          python -m pip install -U pip setuptools "scmver[toml]"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
