@@ -52,8 +52,8 @@ jobs:
           architecture: ${{ matrix.architecture }}
       - name: Install dependencies
         run: |
-          python -m pip install -U pip setuptools wheel
-          pip install -U coverage tox
+          python -m pip install -U pip
+          python -m pip install -U coverage tox
       - name: Install LCOV on Linux
         if: matrix.platform == 'Linux'
         run: sudo apt install lcov
@@ -67,8 +67,6 @@ jobs:
         run: |
           lcov -c -d . -o lcov.info --no-external --exclude '*/_zopfli/zopfli/*'
           rm -rf build
-      - name: Generate XML coverage report
-        run: coverage xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
