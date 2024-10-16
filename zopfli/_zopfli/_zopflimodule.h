@@ -1,7 +1,7 @@
 /*
  * zopfli._zopfli :: _zopflimodule.h
  *
- *   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2024 Akinori Hattori <hattya@gmail.com>
  *
  *   SPDX-License-Identifier: Apache-2.0
  */
@@ -40,13 +40,13 @@ extern "C" {
               PyThread_free_lock((self)->lock); \
           }                                     \
       } while (0)
-#  define ACQUIRE_LOCK(self)                                \
-      do {                                                  \
-          if (!PyThread_acquire_lock((self)->lock, 0)) {    \
-              Py_BEGIN_ALLOW_THREADS                        \
-              PyThread_acquire_lock((self)->lock, 1);       \
-              Py_END_ALLOW_THREADS                          \
-          }                                                 \
+#  define ACQUIRE_LOCK(self)                                            \
+      do {                                                              \
+          if (!PyThread_acquire_lock((self)->lock, NOWAIT_LOCK)) {      \
+              Py_BEGIN_ALLOW_THREADS                                    \
+              PyThread_acquire_lock((self)->lock, WAIT_LOCK);           \
+              Py_END_ALLOW_THREADS                                      \
+          }                                                             \
       } while (0)
 #  define RELEASE_LOCK(self) PyThread_release_lock((self)->lock)
 # else
