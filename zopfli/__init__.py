@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2023 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2024 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,7 @@ import os
 import struct
 import sys
 import threading
-from typing import TYPE_CHECKING, cast, Any, AnyStr, IO, Literal, Optional, Tuple, Union
+from typing import cast, Any, AnyStr, IO, Literal, Optional, Union
 import zipfile
 import zlib
 
@@ -31,11 +31,7 @@ try:
 except ImportError:
     __version__ = 'unknown'
 
-if (TYPE_CHECKING
-    or sys.version_info >= (3, 9)):
-    P = Union[str, os.PathLike[str]]
-else:
-    P = Union[str, os.PathLike]
+P = Union[str, os.PathLike[str]]
 
 
 class ZopfliDecompressor:
@@ -101,9 +97,7 @@ class ZipFile(zipfile.ZipFile):
         if (mode == 'w'
             and self._zopflify(None)
             and fp._compressor):
-            opts = self._options.copy()
-            opts.update(kwargs)
-            fp._compressor = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
+            fp._compressor = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **self._options | kwargs)
         return fp
 
     def _open_to_write(self, zinfo: zipfile.ZipInfo, force_zip64: bool = False) -> IO[bytes]:
@@ -115,9 +109,7 @@ class ZipFile(zipfile.ZipFile):
         z: Optional[ZopfliCompressor] = None
         if zopflify:
             compress_type = zipfile.ZIP_STORED
-            opts = self._options.copy()
-            opts.update(kwargs)
-            z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
+            z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **self._options | kwargs)
         with self._lock:
             fp = self.fp
             try:
@@ -147,9 +139,7 @@ class ZipFile(zipfile.ZipFile):
         z: Optional[ZopfliCompressor] = None
         if zopflify:
             compress_type = zipfile.ZIP_STORED
-            opts = self._options.copy()
-            opts.update(kwargs)
-            z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **opts)
+            z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **self._options | kwargs)
         with self._lock:
             fp = self.fp
             try:
@@ -268,7 +258,7 @@ class ZipInfo(zipfile.ZipInfo):
         super().__init__(*args, **kwargs)
         self.encoding = None
 
-    def _encodeFilenameFlags(self) -> Tuple[bytes, int]:
+    def _encodeFilenameFlags(self) -> tuple[bytes, int]:
         if isinstance(self.filename, bytes):
             return self.filename, self.flag_bits
         encoding = codecs.lookup(self.encoding).name if self.encoding else 'ascii'

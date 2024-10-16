@@ -1,12 +1,13 @@
 #
 # zopfli._zopfli
 #
-#   Copyright (c) 2021 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2021-2024 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: MIT
 #
 
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
+from typing import Optional
 
 
 ZOPFLI_FORMAT_GZIP: int
@@ -38,7 +39,7 @@ class ZopfliPNG:
     filter_strategies: str
     auto_filter_strategy: bool
     keep_color_type: bool
-    keep_chunks: Tuple[str, ...]
+    keep_chunks: tuple[str, ...]
     use_zopfli: bool
     iterations: int
     iterations_large: int
