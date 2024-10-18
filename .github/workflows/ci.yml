@@ -19,18 +19,26 @@ jobs:
         architecture:
           - x86
           - x64
+          - arm64
         include:
           - platform: Linux
             os: ubuntu-latest
           - platform: macOS
+            os: macos-latest
+          - platform: macOS
             os: macos-13
+            architecture: x64
           - platform: Windows
             os: windows-latest
         exclude:
           - platform: Linux
             architecture: x86
+          - platform: Linux
+            architecture: arm64
           - platform: macOS
             architecture: x86
+          - platform: Windows
+            architecture: arm64
       fail-fast: false
     name: Python ${{ matrix.python-version }} (${{ matrix.architecture }}) on ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
