@@ -70,3 +70,22 @@ disable_error_code = [
     "override",
 ]
 strict = true
+
+[tool.ruff]
+line-length = 160
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "UP",
+    "B0",
+    "C4",
+]
+ignore = [
+    "E74",
+]
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
