@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.12
+------------
+
+* Add support for Free Threading.
+
+
 Version 1.11
 ------------
 

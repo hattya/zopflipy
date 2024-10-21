@@ -1,7 +1,7 @@
 /*
  * zopfli._zopfli :: _zopflimodule.c
  *
- *   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2024 Akinori Hattori <hattya@gmail.com>
  *
  *   SPDX-License-Identifier: Apache-2.0
  */
@@ -387,6 +387,9 @@ PyInit__zopfli(void) {
     if (m == NULL) {
         goto err;
     }
+#ifdef Py_GIL_DISABLED
+    PyUnstable_Module_SetGIL(m, Py_MOD_GIL_NOT_USED);
+#endif
     if (PyModule_AddIntMacro(m, ZOPFLI_FORMAT_GZIP) < 0
         || PyModule_AddIntMacro(m, ZOPFLI_FORMAT_ZLIB) < 0
         || PyModule_AddIntMacro(m, ZOPFLI_FORMAT_DEFLATE) < 0) {

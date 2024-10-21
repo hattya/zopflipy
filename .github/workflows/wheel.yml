@@ -29,6 +29,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.21
         env:
           CIBW_SKIP: pp* *musllinux*
+          CIBW_FREE_THREADED_SUPPORT: true
           CIBW_ARCHS_MACOS: universal2
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
