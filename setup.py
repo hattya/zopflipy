@@ -20,6 +20,6 @@ def sources(path, exts):
 
 setup(
     ext_modules=[Extension('zopfli._zopfli',
-                           include_dirs=[os.path.join('zopfli', '_zopfli', 'zopfli', 'src')],
-                           sources=list(sources('zopfli', ['.c', '.cc', '.cpp'])))],
+                           sources=list(sources('zopfli', ['.c', '.cc', '.cpp'])),
+                           include_dirs=[os.path.join('zopfli', '_zopfli', 'zopfli', 'src')])],
 )

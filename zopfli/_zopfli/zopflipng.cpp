@@ -1,7 +1,7 @@
 //
 // zopfli._zopfli :: zopflipng.cpp
 //
-//   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2015-2024 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: Apache-2.0
 //
@@ -15,7 +15,7 @@
 template<typename T>
 static inline void clear(T*& p) {
     delete p;
-    p = 0;
+    p = nullptr;
 }
 
 static inline PyObject* int_FromLong(long i) {
@@ -70,18 +70,18 @@ static void PNG_dealloc(PNG* self) {
 }
 
 static int parse_filter_strategies(PNG* self, PyObject* filter_strategies) {
-    PyObject* b = 0;
+    PyObject* b = nullptr;
     char* s;
     Py_CLEAR(self->filter_strategies);
     if (!str_Check(filter_strategies)) {
         goto err;
     }
     b = str_AsASCIIString(filter_strategies);
-    if (b == 0) {
+    if (b == nullptr) {
         goto err;
     }
     s = PyBytes_AsString(b);
-    if (s == 0) {
+    if (s == nullptr) {
         goto err;
     }
     self->options->filter_strategies.clear();
@@ -136,8 +136,8 @@ err:
 }
 
 static int parse_keep_chunks(PNG* self, PyObject* keep_chunks) {
-    PyObject* u = 0;
-    PyObject* b = 0;
+    PyObject* u = nullptr;
+    PyObject* b = nullptr;
     Py_CLEAR(self->keep_chunks);
     Py_ssize_t n = PySequence_Size(keep_chunks);
     if (n < 0) {
@@ -146,16 +146,16 @@ static int parse_keep_chunks(PNG* self, PyObject* keep_chunks) {
     self->options->keepchunks.clear();
     for (Py_ssize_t i = 0; i < n; ++i) {
         u = PySequence_GetItem(keep_chunks, i);
-        if (u == 0
+        if (u == nullptr
             || !str_Check(u)) {
             goto err;
         }
         b = str_AsASCIIString(u);
-        if (b == 0) {
+        if (b == nullptr) {
             goto err;
         }
         char* s = PyBytes_AsString(b);
-        if (s == 0) {
+        if (s == nullptr) {
             goto err;
         }
         self->options->keepchunks.push_back(s);
@@ -194,16 +194,16 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
         "use_zopfli",
         "iterations",
         "iterations_large",
-        0,
+        nullptr,
     };
 
     PyObject* verbose = Py_False;
     PyObject* lossy_transparent = Py_False;
     PyObject* lossy_8bit = Py_False;
-    PyObject* filter_strategies = 0;
+    PyObject* filter_strategies = nullptr;
     PyObject* auto_filter_strategy = Py_True;
     PyObject* keep_color_type = Py_False;
-    PyObject* keep_chunks = 0;
+    PyObject* keep_chunks = nullptr;
     PyObject* use_zopfli = Py_True;
     clear(self->options);
     self->options = new ZopfliPNGOptions;
@@ -242,7 +242,7 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
 
 #define PARSE_OBJECT(self, var, dv)                 \
     do {                                            \
-        if (var != 0) {                             \
+        if (var != nullptr) {                       \
             if (parse_ ## var((self), var) < 0) {   \
                 goto err;                           \
             }                                       \
@@ -259,7 +259,7 @@ static int PNG_init(PNG* self, PyObject* args, PyObject* kwargs) {
 
 #ifdef WITH_THREAD
     ALLOCATE_LOCK(self);
-    if (PyErr_Occurred() != 0) {
+    if (PyErr_Occurred() != nullptr) {
         goto err;
     }
 #endif
@@ -276,8 +276,8 @@ PyDoc_STRVAR(PNG_optimize__doc__,
 "optimize(data) -> bytes");
 
 static PyObject* PNG_optimize(PNG* self, PyObject* data) {
-    PyObject* v = 0;
-    Py_buffer in = {0};
+    PyObject* v = nullptr;
+    Py_buffer in = {};
     std::vector<unsigned char> out, buf;
     unsigned char* p;
     ACQUIRE_LOCK(self);
@@ -312,12 +312,12 @@ out:
 
 static PyMethodDef PNG_methods[] = {
     {"optimize", reinterpret_cast<PyCFunction>(PNG_optimize), METH_O, PNG_optimize__doc__},
-    {0},
+    {},
 };
 
 static PyObject* PNG_get_object(PNG* self, void* closure) {
     const char *s = static_cast<char*>(closure);
-    PyObject* v = 0;
+    PyObject* v = nullptr;
     if (strcmp(s, "filter_strategies") == 0) {
         v = self->filter_strategies;
     } else if (strcmp(s, "keep_chunks") == 0) {
@@ -330,7 +330,7 @@ static PyObject* PNG_get_object(PNG* self, void* closure) {
 
 static int PNG_set_object(PNG* self, PyObject* value, void* closure) {
     const char* s = static_cast<char*>(closure);
-    if (value == 0) {
+    if (value == nullptr) {
         PyErr_Format(PyExc_TypeError, "cannot delete %s", s);
         return -1;
     }
@@ -372,7 +372,7 @@ static PyObject* PNG_get_bool(PNG* self, void* closure) {
 
 static int PNG_set_bool(PNG* self, PyObject* value, void* closure) {
     const char* s = static_cast<char*>(closure);
-    if (value == 0) {
+    if (value == nullptr) {
         PyErr_Format(PyExc_TypeError, "cannot delete %s", s);
         return -1;
     }
@@ -417,12 +417,12 @@ static PyObject* PNG_get_int(PNG* self, void* closure) {
 
 static int PNG_set_int(PNG* self, PyObject* value, void* closure) {
     const char* s = static_cast<char*>(closure);
-    if (value == 0) {
+    if (value == nullptr) {
         PyErr_Format(PyExc_TypeError, "cannot delete %s", s);
         return -1;
     }
     long v = PyLong_AsLong(value);
-    if (PyErr_Occurred() != 0) {
+    if (PyErr_Occurred() != nullptr) {
         return -1;
     }
 
@@ -434,7 +434,7 @@ static int PNG_set_int(PNG* self, PyObject* value, void* closure) {
     return 0;
 }
 
-#define GET_SET(v, tp) {const_cast<char*>(#v), reinterpret_cast<getter>(PNG_get_ ## tp), reinterpret_cast<setter>(PNG_set_ ## tp), 0, const_cast<char*>(#v)}
+#define GET_SET(v, tp) {const_cast<char*>(#v), reinterpret_cast<getter>(PNG_get_ ## tp), reinterpret_cast<setter>(PNG_set_ ## tp), nullptr, const_cast<char*>(#v)}
 
 static PyGetSetDef PNG_getset[] = {
     GET_SET(filter_strategies,    object),
@@ -447,7 +447,7 @@ static PyGetSetDef PNG_getset[] = {
     GET_SET(use_zopfli,           bool),
     GET_SET(iterations,           int),
     GET_SET(iterations_large,     int),
-    {0},
+    {},
 };
 
 #undef GET_SET
