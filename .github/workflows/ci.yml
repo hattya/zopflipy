@@ -53,6 +53,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Setup Python
         uses: actions/setup-python@v5
