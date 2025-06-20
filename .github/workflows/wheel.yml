@@ -24,12 +24,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
           submodules: recursive
       - name: Build
-        uses: pypa/cibuildwheel@v2.21
+        uses: pypa/cibuildwheel@v3.0
         env:
-          CIBW_SKIP: pp* *musllinux*
-          CIBW_FREE_THREADED_SUPPORT: true
+          CIBW_SKIP: '*musllinux*'
+          CIBW_ENABLE: cpython-freethreading
           CIBW_ARCHS_MACOS: universal2
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
