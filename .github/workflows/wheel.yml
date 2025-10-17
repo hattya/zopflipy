@@ -21,13 +21,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
           submodules: recursive
       - name: Build
-        uses: pypa/cibuildwheel@v3.0
+        uses: pypa/cibuildwheel@v3.2
         env:
           CIBW_SKIP: '*musllinux*'
           CIBW_ENABLE: cpython-freethreading
