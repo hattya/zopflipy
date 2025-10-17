@@ -30,7 +30,7 @@ jobs:
           - platform: macOS
             os: macos-latest
           - platform: macOS
-            os: macos-13
+            os: macos-15-intel
             architecture: x64
           - platform: Windows
             os: windows-latest
@@ -52,12 +52,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           submodules: recursive
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
