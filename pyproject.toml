@@ -21,7 +21,6 @@ classifiers = [
     "Programming Language :: C",
     "Programming Language :: C++",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -31,7 +30,7 @@ classifiers = [
     "Topic :: System :: Archiving :: Compression",
     "Typing :: Typed",
 ]
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 dynamic = [
     "version",
 ]

@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2024 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2025 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,7 @@ import os
 import struct
 import sys
 import threading
-from typing import cast, Any, AnyStr, IO, Literal, Optional, Union
+from typing import cast, Any, AnyStr, IO, Literal, TypeAlias
 import zipfile
 import zlib
 
@@ -31,7 +31,7 @@ try:
 except ImportError:
     __version__ = 'unknown'
 
-P = Union[str, os.PathLike[str]]
+P: TypeAlias = str | os.PathLike[str]
 
 
 class ZopfliDecompressor:
@@ -72,8 +72,8 @@ class ZipFile(zipfile.ZipFile):
     compression: int
     _lock: threading.RLock
 
-    def __init__(self, file: Union[P, IO[bytes]], mode: Literal['r', 'w', 'x', 'a'] = 'r', compression: int = zipfile.ZIP_DEFLATED, allowZip64: bool = True,
-                 compresslevel: Optional[int] = None, *, strict_timestamps: bool = True, encoding: str = 'cp437', **kwargs: Any) -> None:
+    def __init__(self, file: P | IO[bytes], mode: Literal['r', 'w', 'x', 'a'] = 'r', compression: int = zipfile.ZIP_DEFLATED, allowZip64: bool = True,
+                 compresslevel: int | None = None, *, strict_timestamps: bool = True, encoding: str = 'cp437', **kwargs: Any) -> None:
         self.encoding = encoding
         self._options = kwargs
         super().__init__(file, mode, compression, allowZip64, compresslevel)
@@ -91,7 +91,7 @@ class ZipFile(zipfile.ZipFile):
                 zi.filename = n
             self.NameToInfo[zi.filename] = zi
 
-    def open(self, name: Union[str, zipfile.ZipInfo], mode: Literal['r', 'w'] = 'r', pwd: Optional[bytes] = None,
+    def open(self, name: str | zipfile.ZipInfo, mode: Literal['r', 'w'] = 'r', pwd: bytes | None = None,
              *, force_zip64: bool = False, **kwargs: Any) -> IO[bytes]:
         fp = super().open(name, mode, pwd, force_zip64=force_zip64)
         if (mode == 'w'
@@ -103,10 +103,10 @@ class ZipFile(zipfile.ZipFile):
     def _open_to_write(self, zinfo: zipfile.ZipInfo, force_zip64: bool = False) -> IO[bytes]:
         return cast(IO[bytes], super()._open_to_write(self._convert(zinfo), force_zip64))
 
-    def write(self, filename: P, arcname: Optional[P] = None,
-              compress_type: Optional[int] = None, compresslevel: Optional[int] = None, **kwargs: Any) -> None:
+    def write(self, filename: P, arcname: P | None = None,
+              compress_type: int | None = None, compresslevel: int | None = None, **kwargs: Any) -> None:
         zopflify = self._zopflify(compress_type)
-        z: Optional[ZopfliCompressor] = None
+        z: ZopfliCompressor | None = None
         if zopflify:
             compress_type = zipfile.ZIP_STORED
             z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **self._options | kwargs)
@@ -129,14 +129,14 @@ class ZipFile(zipfile.ZipFile):
             self.filelist[-1] = zi
             self.NameToInfo[zi.filename] = zi
 
-    def writestr(self, zinfo_or_arcname: Union[str, zipfile.ZipInfo], data: AnyStr,
-                 compress_type: Optional[int] = None, compresslevel: Optional[int] = None, **kwargs: Any) -> None:
+    def writestr(self, zinfo_or_arcname: str | zipfile.ZipInfo, data: AnyStr,
+                 compress_type: int | None = None, compresslevel: int | None = None, **kwargs: Any) -> None:
         if isinstance(zinfo_or_arcname, zipfile.ZipInfo):
             compress_type = zinfo_or_arcname.compress_type
             if isinstance(zinfo_or_arcname, ZipInfo):
                 zinfo_or_arcname.encoding = self.encoding
         zopflify = self._zopflify(compress_type)
-        z: Optional[ZopfliCompressor] = None
+        z: ZopfliCompressor | None = None
         if zopflify:
             compress_type = zipfile.ZIP_STORED
             z = ZopfliCompressor(ZOPFLI_FORMAT_DEFLATE, **self._options | kwargs)
@@ -159,7 +159,7 @@ class ZipFile(zipfile.ZipFile):
             self.NameToInfo[zi.filename] = zi
 
     if sys.version_info >= (3, 11):
-        def mkdir(self, zinfo_or_directory: Union[str, zipfile.ZipInfo], mode: int = 511) -> None:
+        def mkdir(self, zinfo_or_directory: str | zipfile.ZipInfo, mode: int = 511) -> None:
             with self._lock:
                 fp = self.fp
                 try:
@@ -184,13 +184,13 @@ class ZipFile(zipfile.ZipFile):
         dst.encoding = self.encoding
         return dst
 
-    def _file(self, z: Optional[ZopfliCompressor]) -> IO[bytes]:
+    def _file(self, z: ZopfliCompressor | None) -> IO[bytes]:
         LFH = '<4s5H3L2H'
         EFS = 1 << 11
 
         class ZopfliFile:
 
-            def __init__(self, zf: ZipFile, z: Optional[ZopfliCompressor]) -> None:
+            def __init__(self, zf: ZipFile, z: ZopfliCompressor | None) -> None:
                 self.size = 0
                 self._zf = zf
                 self._fp = zf.fp
@@ -241,7 +241,7 @@ class ZipFile(zipfile.ZipFile):
         return (zi.file_size > zipfile.ZIP64_LIMIT
                 or zi.compress_size > zipfile.ZIP64_LIMIT)
 
-    def _zopflify(self, compression: Optional[int]) -> bool:
+    def _zopflify(self, compression: int | None) -> bool:
         return (compression == zipfile.ZIP_DEFLATED
                 or (compression is None
                     and self.compression == zipfile.ZIP_DEFLATED))
@@ -251,7 +251,7 @@ class ZipInfo(zipfile.ZipInfo):
 
     __slots__ = ('encoding',)
 
-    encoding: Optional[str]
+    encoding: str | None
     orig_filename: str
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:

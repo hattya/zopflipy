@@ -6,6 +6,7 @@ Version 1.12
 
 * Add support for Free Threading.
 * Support Python 3.14.
+* Drop Python 3.9 support.
 
 
 Version 1.11
