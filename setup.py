@@ -23,5 +23,5 @@ setup(
     ext_modules=[Extension('zopfli._zopfli',
                            sources=list(sources('zopfli', ['.c', '.cc', '.cpp'])),
                            include_dirs=[os.path.join('zopfli', '_zopfli', 'zopfli', 'src')],
-                           define_macros=[('Py_GIL_DISABLED', 1)] if sysconfig.get_config_var('Py_GIL_DISABLED') else [])]
+                           define_macros=[('Py_GIL_DISABLED', 1)] if sysconfig.get_config_var('Py_GIL_DISABLED') else [])],
 )

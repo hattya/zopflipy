@@ -1,7 +1,7 @@
 /*
  * zopfli._zopfli :: _zopflimodule.h
  *
- *   Copyright (c) 2015-2024 Akinori Hattori <hattya@gmail.com>
+ *   Copyright (c) 2015-2025 Akinori Hattori <hattya@gmail.com>
  *
  *   SPDX-License-Identifier: Apache-2.0
  */
@@ -57,9 +57,7 @@ extern "C" {
 
 
 extern PyTypeObject Compressor_Type;
-
 extern PyTypeObject Deflater_Type;
-
 extern PyTypeObject PNG_Type;
 
 
