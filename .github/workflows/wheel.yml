@@ -33,7 +33,7 @@ jobs:
           CIBW_ENABLE: cpython-freethreading
           CIBW_ARCHS_MACOS: universal2
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dist-${{ matrix.platform }}
           path: wheelhouse
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Merge artifacts
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v5
         with:
           name: dist
           delete-merged: true
