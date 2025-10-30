@@ -7,6 +7,7 @@ Version 1.12
 * Add support for Free Threading.
 * Support Python 3.14.
 * Drop Python 3.9 support.
+* Update Zopfli to commit ccf9f0588d4a4509cb1040310ec122243e670ee6.
 
 
 Version 1.11
