@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.12
 ------------
 
+Release date: 2025-10-31
+
 * Add support for Free Threading.
 * Support Python 3.14.
 * Drop Python 3.9 support.
