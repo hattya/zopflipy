@@ -58,6 +58,10 @@ fallback = {attr = "__version__:version", path = "zopfli"}
 branch = true
 
 [tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "except ImportError:",
+]
 partial_branches = [
     "pragma: no partial",
     "if sys.version_info",
