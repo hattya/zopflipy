@@ -1,7 +1,7 @@
 #
 # test_zopfli
 #
-#   Copyright (c) 2015-2025 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2026 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -350,11 +350,11 @@ class ZipFileTest(unittest.TestCase):
             writestr(zf, f('{eggs}.txt'), f('{eggs}.txt').encode(encoding))
         with zopfli.ZipFile(path, 'r', encoding=encoding) as zf:
             for n, flag_bits in (
-                ('{spam}.txt', 0x800),
-                ('{eggs}.txt', 0),
+                ('{spam}.txt', zopfli._ZIP_EFS),
+                ('{eggs}.txt', zopfli._ZIP_EFS if encoding == 'utf-8' else 0),
             ):
                 name = f(n)
-                raw_name = name.encode('utf-8' if flag_bits else encoding).decode('utf-8' if flag_bits else 'cp437')
+                raw_name = name.encode(encoding).decode(encoding if flag_bits else 'cp437')
                 zi = zf.getinfo(name)
                 self.assertEqual(zi.orig_filename, raw_name)
                 self.assertEqual(zi.filename, name)
@@ -423,7 +423,7 @@ class ZipFileTest(unittest.TestCase):
                 self.assertEqual(zi.orig_filename, raw_name)
                 self.assertEqual(zi.filename, name)
                 self.assertEqual(zi.compress_type, compress_type)
-                self.assertEqual(zi.flag_bits, 0x800 if encoding == 'utf-8' else 0)
+                self.assertEqual(zi.flag_bits, zopfli._ZIP_EFS if encoding == 'utf-8' else 0)
                 if zi.is_dir():
                     self.assertEqual(zi.CRC, 0)
                     self.assertEqual(zi.compress_size, 0)

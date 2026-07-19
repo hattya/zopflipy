@@ -1,7 +1,7 @@
 #
 # zopfli
 #
-#   Copyright (c) 2015-2025 Akinori Hattori <hattya@gmail.com>
+#   Copyright (c) 2015-2026 Akinori Hattori <hattya@gmail.com>
 #
 #   SPDX-License-Identifier: Apache-2.0
 #
@@ -32,6 +32,8 @@ except ImportError:
     __version__ = 'unknown'
 
 P: TypeAlias = str | os.PathLike[str]
+
+_ZIP_EFS = 1 << 11
 
 
 class ZopfliDecompressor:
@@ -83,7 +85,7 @@ class ZipFile(zipfile.ZipFile):
         super()._RealGetContents()
         for i, zi in enumerate(self.filelist):
             self.filelist[i] = zi = self._convert(zi)
-            if not zi.flag_bits & 0x800:
+            if not zi.flag_bits & _ZIP_EFS:
                 n = zi.orig_filename.encode('cp437').decode(self.encoding)
                 if os.sep != '/':
                     n = n.replace(os.sep, '/')
@@ -186,7 +188,6 @@ class ZipFile(zipfile.ZipFile):
 
     def _file(self, z: ZopfliCompressor | None) -> IO[bytes]:
         LFH = '<4s5H3L2H'
-        EFS = 1 << 11
 
         class ZopfliFile:
 
@@ -226,11 +227,11 @@ class ZipFile(zipfile.ZipFile):
 
             def _rewrite(self, fh: bytes) -> bytes:
                 sig, ver, flag, meth, lmt, lmd, crc, csize, fsize, n, m = struct.unpack(LFH, fh[:30])
-                if flag & EFS:
+                if flag & _ZIP_EFS:
                     try:
                         name = fh[30:30+n].decode('utf-8').encode(self._zf.encoding)
                         if name != fh[30:30+n]:
-                            return struct.pack(LFH, sig, ver, flag & ~EFS, meth, lmt, lmd, crc, csize, fsize, len(name), m) + name + fh[30+n:]
+                            return struct.pack(LFH, sig, ver, flag & ~_ZIP_EFS, meth, lmt, lmd, crc, csize, fsize, len(name), m) + name + fh[30+n:]
                     except UnicodeEncodeError:
                         pass
                 return fh
@@ -260,11 +261,14 @@ class ZipInfo(zipfile.ZipInfo):
 
     def _encodeFilenameFlags(self) -> tuple[bytes, int]:
         if isinstance(self.filename, bytes):
-            return self.filename, self.flag_bits
-        encoding = codecs.lookup(self.encoding).name if self.encoding else 'ascii'
-        if encoding != 'utf-8':
             try:
-                return self.filename.encode(encoding), self.flag_bits
+                self.filename.decode('utf-8')
+            except UnicodeDecodeError:
+                return self.filename, self.flag_bits & ~_ZIP_EFS
+            return self.filename, self.flag_bits | _ZIP_EFS
+        elif (enc := codecs.lookup(self.encoding).name if self.encoding else 'ascii') != 'utf-8':
+            try:
+                return self.filename.encode(enc), self.flag_bits & ~_ZIP_EFS
             except UnicodeEncodeError:
                 pass
-        return self.filename.encode('utf-8'), self.flag_bits | 0x800
+        return self.filename.encode('utf-8'), self.flag_bits | _ZIP_EFS

@@ -1,6 +1,12 @@
 ZopfliPy Changelog
 ==================
 
+Version 1.13
+------------
+
+* Adapt ``ZipInfo`` to changes in ``zipfile.ZipInfo``.
+
+
 Version 1.12
 ------------
 
