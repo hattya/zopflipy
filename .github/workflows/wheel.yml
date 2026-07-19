@@ -21,19 +21,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
           submodules: recursive
       - name: Build
-        uses: pypa/cibuildwheel@v3.3
+        uses: pypa/cibuildwheel@v4.1
         env:
           CIBW_SKIP: '*musllinux*'
-          CIBW_ENABLE: cpython-freethreading
           CIBW_ARCHS_MACOS: universal2
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: dist-${{ matrix.platform }}
           path: wheelhouse
@@ -43,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Merge artifacts
-        uses: actions/upload-artifact/merge@v6
+        uses: actions/upload-artifact/merge@v7
         with:
           name: dist
           delete-merged: true
