@@ -53,7 +53,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
           submodules: recursive
@@ -80,7 +80,7 @@ jobs:
           lcov -c -d . -o lcov.info --no-external --exclude '*/_zopfli/zopfli/*'
           rm -rf build
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: PYTHON_VERSION,ARCH
