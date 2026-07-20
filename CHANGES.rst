@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.13
 ------------
 
+Release date: 2026-07-20
+
 * Adapt ``ZipInfo`` to changes in ``zipfile.ZipInfo``.
 
 
