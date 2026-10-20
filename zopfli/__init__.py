@@ -12,7 +12,6 @@ from __future__ import annotations
 import codecs
 import os
 import struct
-import sys
 import threading
 from typing import cast, Any, AnyStr, IO, Literal, TypeAlias
 import zipfile
@@ -160,18 +159,17 @@ class ZipFile(zipfile.ZipFile):
             self.filelist[-1] = zi
             self.NameToInfo[zi.filename] = zi
 
-    if sys.version_info >= (3, 11):
-        def mkdir(self, zinfo_or_directory: str | zipfile.ZipInfo, mode: int = 511) -> None:
-            with self._lock:
-                fp = self.fp
-                try:
-                    self.fp = self._file(None)
-                    super().mkdir(zinfo_or_directory, mode)
-                    zi = self._convert(self.filelist[-1])
-                finally:
-                    self.fp = fp
-                self.filelist[-1] = zi
-                self.NameToInfo[zi.filename] = zi
+    def mkdir(self, zinfo_or_directory: str | zipfile.ZipInfo, mode: int = 511) -> None:
+        with self._lock:
+            fp = self.fp
+            try:
+                self.fp = self._file(None)
+                super().mkdir(zinfo_or_directory, mode)
+                zi = self._convert(self.filelist[-1])
+            finally:
+                self.fp = fp
+            self.filelist[-1] = zi
+            self.NameToInfo[zi.filename] = zi
 
     def _convert(self, src: zipfile.ZipInfo) -> ZipInfo:
         if isinstance(src, ZipInfo):
