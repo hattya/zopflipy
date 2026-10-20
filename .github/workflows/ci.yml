@@ -15,7 +15,6 @@ jobs:
           - '3.11'
           - '3.12'
           - '3.13'
-          - '3.13t'
           - '3.14'
           - '3.14t'
         architecture:
@@ -58,7 +57,7 @@ jobs:
           persist-credentials: false
           submodules: recursive
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
