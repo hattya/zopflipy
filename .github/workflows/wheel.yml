@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
           submodules: recursive
       - name: Build
-        uses: pypa/cibuildwheel@v4.1
+        uses: pypa/cibuildwheel@v4.3
         env:
           CIBW_SKIP: '*musllinux*'
           CIBW_ARCHS_MACOS: universal2
