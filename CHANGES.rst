@@ -4,6 +4,8 @@ ZopfliPy Changelog
 Version 1.14
 ------------
 
+Release date: 2026-10-24
+
 * Drop Python 3.10 support.
 * Support Python 3.15.
 
